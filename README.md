@@ -24,13 +24,27 @@ sudo apt install build-essential libsdl1.2-dev libsdl-mixer1.2-dev \
 # Build libraries
 cd lib && make
 
+# Build FTGL
+cd ../contrib/FTGL-2.1.2 && make
+
 # Build contrib libraries
-cd ../contrib/tcp4u.331/src && make -f ../Unix/Makefile
+cd ../tcp4u.331/src && make -f ../Unix/Makefile
 cd ../../irclib && make
 cd ../unrar && make
 
 # Build main executable
 cd ../../uplink/src && make -f Makefile.linux
+
+# Set up bin folder
+cd ../bin
+cp ../src/uplink.full ./uplink
+ln -sf ../../Installer/data/*.dat .
+```
+
+### Running
+```bash
+cd uplink/bin
+./uplink
 ```
 
 ## UplinkOS Mod Fixes Integrated
