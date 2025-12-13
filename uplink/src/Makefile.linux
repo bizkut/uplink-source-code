@@ -19,6 +19,7 @@ INCLUDES = 	-I.					\
 		-I../../lib/mmgr/			\
 		-I$(TCP4U_DIR)/Include			\
 		-I$(CONTRIB_DIR)/include		\
+		-I$(CONTRIB_DIR)/FTGL-2.1.2/include	\
 		-I$(IRCLIB_DIR)				\
 		-I$(IRCLIB_DIR)/linux
 
@@ -33,6 +34,7 @@ LIBS_INCLUDES = \
 	-L $(TCP4U_DIR)/src \
 	-L $(IRCLIB_DIR) \
 	-L $(UNRAR_DIR) \
+	-L $(CONTRIB_DIR)/FTGL-2.1.2 \
 	-L $(CONTRIB_DIR)/install/lib
 
 LIBS = \
