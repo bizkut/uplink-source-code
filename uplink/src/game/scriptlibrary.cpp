@@ -190,9 +190,17 @@ void ScriptLibrary::Script10 ()
 	int i_value;
 	sscanf ( value, "%d", &i_value );
 
+	// [UPLINKOS MOD FIX] Enhanced field validation
+	// Check that ALL required fields are filled in before making transfer
+	if ( strlen(target_ip) == 0 || strlen(source_accno) == 0 || 
+	     strlen(target_accno) == 0 || strlen(value) == 0 ) {
+		create_msgbox ( "Error", "You must first fill out all of the fields before making a transfer." );
+		return;
+	}
+
 	// Check the player has filled in the correct values
 	
-	if ( strcmp ( target_accno, "Fill this in" ) == 0 
+	if ( strcmp ( target_ip,    "Fill this in" ) == 0 
 	  || strcmp ( target_accno, "Fill this in" ) == 0 
 	  || strcmp ( value,		"Fill this in" ) == 0 )
 		return;
@@ -318,6 +326,17 @@ void ScriptLibrary::Script12 ()
 	char *name    = EclGetButton ( "nametext 0 0" )->caption;
 	char *passwd  = EclGetButton ( "passwordtext 0 0" )->caption;
 	char *passwd2 = EclGetButton ( "passwordtext2 0 0" )->caption;
+
+	// [UPLINKOS MOD FIX] Add missing validation for username and password
+    if ( strcmp ( name, "Fill this in" ) == 0 || strlen ( name ) == 0 ) {
+        create_msgbox ( "Error", "You must enter an username" );
+        return;
+    }
+
+    if ( strlen ( passwd ) == 0 ) {
+        create_msgbox ( "Error", "You must enter a password" );
+        return;
+    }
 
 	if ( strcmp ( passwd, passwd2 ) != 0 ) {
 		create_msgbox ( "Error", "The two passwords must be identical" );

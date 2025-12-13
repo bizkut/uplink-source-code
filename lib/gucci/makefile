@@ -8,7 +8,7 @@ libgucci.a : $(OBJECTS)
 include ../standard.mk
 include ../includes.mk
 
-CXXFLAGS += -DUSE_SDL -DUSE_FTGL
+CXXFLAGS += -DUSE_SDL -DUSE_FTGL 
 
 
 

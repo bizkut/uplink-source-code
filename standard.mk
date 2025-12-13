@@ -1,5 +1,5 @@
-export CC = apgcc
-export CXX = apg++
+export CC = gcc
+export CXX = g++
 RMF = rm -f 
 #CXXFLAGS += -g
 #CXXFLAGS += -DSLASHER -D_DEBUG

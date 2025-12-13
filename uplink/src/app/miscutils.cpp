@@ -475,10 +475,7 @@ void PrintStackTrace()
 		mov [framePtr], ebp
 	}
 #else
-	asm (
-	    "movl %%ebp, %0;"
-	    :"=r"(framePtr)
-	    );
+	framePtr = (unsigned *)__builtin_frame_address(0);
 #endif
 	while(framePtr) {
 		                

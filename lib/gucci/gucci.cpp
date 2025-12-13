@@ -21,9 +21,9 @@
 #include <FTGLBitmapFont.h>
 //#include <FTGLPixmapFont.h>
 #  else
-#include <ftgl/FTFace.h>
-#include <ftgl/FTGLBitmapFont.h>
-//#include <ftgl/FTGLPixmapFont.h>
+#include <FTFace.h>
+#include <FTGLBitmapFont.h>
+//#include <FTGLPixmapFont.h>
 #  endif
 
 static std::map<int, FTGLBitmapFont *> fonts;

@@ -8,6 +8,8 @@ INCLUDES += -I$(INSTALLDIR)/include
 
 INCLUDES += -I$(CONTRIBDIR)/install/include/freetype2
 INCLUDES += -I$(CONTRIBDIR)/install/include/freetype2/freetype
+INCLUDES += -I$(CONTRIBDIR)/FTGL-2.1.2/include
+INCLUDES += -I/usr/include/freetype2
 #INCLUDES += -I$(CONTRIBDIR)/ftgl_dist/src
 INCLUDES += -I$(CONTRIBDIR)
 CXXFLAGS += $(INCLUDES)
