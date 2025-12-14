@@ -1241,6 +1241,9 @@ void Init_OpenGL ( int argc, char **argv )
 	opengl_initialise ( argc, argv );
 
 
+        // [HDUI] Initialize HD UI mode (Allegro5)
+        HDUI::HDUIManager::GetInstance().Initialize(1920, 1080, false);
+
 	app->GetOptions ()->SetOptionValue ( "crash_graphicsinit", 0, "", true, false );
 	app->GetOptions ()->Save ( NULL );
 
@@ -1314,6 +1317,9 @@ void Run_Game ()
 
 void Cleanup_Uplink() {
 
+
+        // [HDUI] Shutdown HD UI
+        HDUI::HDUIManager::GetInstance().Shutdown();
 #if defined(FULLGAME) || defined(TESTGAME)
 #if defined(WIN32)
 	Cleanup_Steam ();
