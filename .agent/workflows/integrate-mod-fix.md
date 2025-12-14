@@ -2,29 +2,35 @@
 description: How to integrate UplinkOS mod fixes
 ---
 
-## Integrating Mod Fixes
+# Integrate Mod Fix
 
-1. Find the fix in the decompiled mod code:
+// turbo-all
+
+## Steps
+
+1. **Search decompiled mod**
 ```bash
 grep -n "search_term" /home/bizkut/Downloads/uplink-source-code/uplink/mod/UplinkOS.exe.c
 ```
 
-2. Locate corresponding original source file in `uplink/src/`
+2. **Find original source** in `uplink/src/`
 
-3. Compare logic and add fix with comment:
+3. **Apply fix with comment**
 ```cpp
-// [UPLINKOS MOD FIX] Description of fix
+// [UPLINKOS MOD FIX] Description
 // ... modified code ...
 ```
 
-4. Mark as complete in task.md
+4. **Update docs** - Mark complete in `docs/MOD_FIXES.md`
 
-## Key Files
-- `game/scriptlibrary.cpp` - Script handlers (transfers, account creation)
-- `interface/taskmanager/` - App implementations
-- `world/computer/bankaccount.cpp` - Bank logic
-- `interface/localinterface/lan_interface.cpp` - LAN system
+## Key Locations
+| Area | Files |
+|------|-------|
+| Scripts | `game/scriptlibrary.cpp` |
+| Apps | `interface/taskmanager/*.cpp` |
+| Bank | `world/computer/bankaccount.cpp` |
+| LAN | `interface/localinterface/lan_interface.cpp` |
 
-## Decompiled Code Reference
-- `uplink/mod/UplinkOS.exe.c` - Full decompiled mod (~800k lines)
-- Look for `HD_` prefixed classes (mod's wrapper classes)
+## Reference
+- Decompiled: `uplink/mod/UplinkOS.exe.c` (~800k lines)
+- Look for `HD_` prefixed classes

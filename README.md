@@ -1,71 +1,41 @@
-# Uplink Source Code - Linux Port with UplinkOS Mod Fixes
+# Uplink Source Code
 
-A port of the Uplink game source code to modern Linux systems, incorporating bug fixes from the UplinkOS mod.
+Linux port of Uplink with UplinkOS mod HD UI integration.
 
-## Project Status
-
-| Component | Status |
-|-----------|--------|
-| Source Compilation | ✅ 199 files compiled |
-| Library Build | ✅ 10/10 libraries |
-| Linking | ❌ FTGL compatibility issue |
-| Mod Fixes | 🔄 2/16 integrated |
-
-## Building
-
-### Prerequisites
+## Quick Start
 ```bash
-sudo apt install build-essential libsdl1.2-dev libsdl-mixer1.2-dev \
-    libftgl-dev libfreetype6-dev libtiff-dev libgl1-mesa-dev libglu1-mesa-dev
+# Build
+cd uplink/src && make -f Makefile.linux
+
+# Run
+cd ../bin && ./uplink.full
 ```
 
-### Build Steps
-```bash
-# Build libraries
-cd lib && make
+## Documentation
 
-# Build FTGL
-cd ../contrib/FTGL-2.1.2 && make
+| Doc | Purpose |
+|-----|---------|
+| `docs/PROJECT_CONTEXT.md` | **Start here** - Project overview, directory structure |
+| `docs/MOD_FIXES.md` | Bug fix tracking and HD UI progress |
+| `docs/ARCHITECTURE.md` | Source code navigation |
+| `.agent/workflows/` | Agent task workflows |
 
-# Build contrib libraries
-cd ../tcp4u.331/src && make -f ../Unix/Makefile
-cd ../../irclib && make
-cd ../unrar && make
+## Agent Workflows
 
-# Build main executable
-cd ../../uplink/src && make -f Makefile.linux
+| Workflow | Command |
+|----------|---------|
+| `/build` | Build the project |
+| `/integrate-mod-fix` | Port a fix from decompiled mod |
+| `/hd-ui` | HD UI development |
 
-# Set up bin folder
-cd ../bin
-cp ../src/uplink.full ./uplink
-ln -sf ../../Installer/data/*.dat .
-```
-
-### Running
-```bash
-cd uplink/bin
-./uplink
-```
-
-## UplinkOS Mod Fixes Integrated
-
-Changes from the UplinkOS mod that have been ported:
-
-- **Bank Transfer Validation** - All fields must be filled before transfer
-- **Stock Account Validation** - Username/password checks for stock accounts
-
-See `docs/MOD_FIXES.md` for the full list of fixes to be integrated.
-
-## Directory Structure
+## Key Directories
 
 ```
-uplink-source-code/
-├── uplink/src/      # Main game source code
-├── lib/             # Internal libraries (gucci, eclipse, etc.)
-├── contrib/         # Third-party dependencies
-└── .agent/          # AI agent workflows
+uplink/src/          # Game source
+uplink/src/hd_ui/    # HD UI framework (Allegro5)
+uplink/mod/          # Reference: decompiled mod
+uplink/bin/uplinkHD/ # HD UI assets (layouts, fonts)
 ```
 
-## License
-
-Original Uplink source code is © Introversion Software.
+## Current Focus: HD UI Port
+See `.agent/workflows/hd-ui.md` for HD UI development tasks.
