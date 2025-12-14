@@ -232,6 +232,10 @@ void PasswordBreaker::Tick ( int n )
 
 	if ( IsInterfaceVisible () ) {
 
+		// [UPLINKOS MOD FIX] Don't run animation when game is paused
+		if ( game->GameSpeed () <= GAMESPEED_PAUSED )
+			return;
+
 		if ( length > 0 ) {
 
 			for ( int count = 0; count < n; ++count ) {
@@ -304,6 +308,16 @@ void PasswordBreaker::Tick ( int n )
                     if ( username ) Computer::GenerateAccessCode( username, password, newcode, sizeof ( newcode ) );
                     else			Computer::GenerateAccessCode( password, newcode, sizeof ( newcode ) );
 					game->GetWorld ()->GetPlayer ()->GiveCode ( game->GetWorld ()->GetPlayer ()->remotehost, newcode );				
+
+					// [UPLINKOS MOD FIX] Auto-click proceed button after cracking password
+					// Try common proceed button names for different screen types
+					if ( EclGetButton ( "useridscreen_proceed" ) ) {
+						EclClickButton ( "useridscreen_proceed" );
+					} else if ( EclGetButton ( "highsecurity_proceed" ) ) {
+						EclClickButton ( "highsecurity_proceed" );
+					} else if ( EclGetButton ( "cypherscreen_proceed" ) ) {
+						EclClickButton ( "cypherscreen_proceed" );
+					}
 
 					// Remove this task
 

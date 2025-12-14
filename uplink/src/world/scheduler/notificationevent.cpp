@@ -719,9 +719,14 @@ void NotificationEvent::ScheduleStartingEvents ()
 	expirelogs->SetRunDate ( &(game->GetWorld ()->date) );
 	game->GetWorld ()->scheduler.ScheduleEvent ( expirelogs );
 
+	// [UPLINKOS MOD FIX] Don't charge interest immediately on new game
+	// Wait FREQUENCY_ADDINTERESTONLOANS before first interest charge
 	NotificationEvent *interestonloans = new NotificationEvent ();
 	interestonloans->SetTYPE ( NOTIFICATIONEVENT_TYPE_ADDINTERESTONLOANS );
-	interestonloans->SetRunDate ( &(game->GetWorld ()->date) );
+	Date interestdate;
+	interestdate.SetDate ( &(game->GetWorld ()->date) );
+	interestdate.AdvanceMinute ( FREQUENCY_ADDINTERESTONLOANS );
+	interestonloans->SetRunDate ( &interestdate );
 	game->GetWorld ()->scheduler.ScheduleEvent ( interestonloans );
 
 #ifdef DEMOGAME

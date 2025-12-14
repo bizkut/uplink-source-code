@@ -549,6 +549,21 @@ void LanInterface::LanSystemDraw ( Button *button, bool highlighted, bool clicke
 
 		    UplinkAssert ( button->image_standard );
 		    button->image_standard->Draw ( button->x, button->y );
+		    
+		    // [UPLINKOS MOD FIX] Show lock state with colored border
+		    // data1 = 1 (locked) or 0 (unlocked) for LANSYSTEM_LOCK
+		    if ( system->TYPE == LANSYSTEM_LOCK ) {
+		        if ( system->data1 == 0 ) {
+		            // Unlocked - green border
+		            glColor3f ( 0.0f, 1.0f, 0.0f );
+		        } else {
+		            // Locked - red border  
+		            glColor3f ( 1.0f, 0.0f, 0.0f );
+		        }
+		        glLineWidth ( 2.0f );
+		        border_draw ( button );
+		        glLineWidth ( 1.0f );
+		    }
             break;
 
     }

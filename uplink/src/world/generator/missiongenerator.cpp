@@ -455,9 +455,9 @@ Mission *MissionGenerator::Generate_StealAllFiles ( Company *employer, Computer 
 	for ( int i = 0; i < numfiles; ++i ) {
 
 		char datatitle [64];
-		UplinkSnprintf ( datatitle, sizeof ( datatitle ), "%c%c%c%c-%s %d.dat", target->companyname [0], target->companyname [1],
+		UplinkSnprintf ( datatitle, sizeof ( datatitle ), "%c%c%c%c-%s-%d.%d.%d %d.dat", target->companyname [0], target->companyname [1],
 																	   target->companyname [2], target->companyname [3],
-																		missiontypestring [missiontype-1], i );
+																		missiontypestring [missiontype-1], game->GetWorld ()->date.GetDay (), game->GetWorld ()->date.GetMonth (), game->GetWorld ()->date.GetYear (), i );
 
 		int size = (int) NumberGenerator::RandomNormalNumber ( 10, 5 );
 		totalsize += size;
@@ -516,7 +516,7 @@ Mission *MissionGenerator::Generate_StealAllFiles ( Company *employer, Computer 
 	UplinkStrncpy ( completionA, target->ip, sizeof ( completionA ) );
 	UplinkStrncpy ( completionB, "ALL", sizeof ( completionB ) );
 	UplinkStrncpy ( completionC, ourcomp->ip, sizeof ( completionC ) );
-	UplinkSnprintf ( completionD, sizeof ( completionD ), "%d %d", numfiles, totalsize );
+	UplinkSnprintf ( completionD, sizeof ( completionD ), "%d %d %d.%d.%d", numfiles, totalsize, game->GetWorld ()->date.GetDay (), game->GetWorld ()->date.GetMonth (), game->GetWorld ()->date.GetYear () );
 
 	if ( missiontype == 1 ) {
 
@@ -865,7 +865,7 @@ Mission *MissionGenerator::Generate_DestroyAllFiles ( Company *employer, Compute
 	for ( int i = 0; i < numfiles; ++i ) {
 
 		char datatitle [64];
-		UplinkSnprintf ( datatitle, sizeof ( datatitle ), "%c%c%c%c-%s %d.dat", target->companyname [0], target->companyname [1],
+		UplinkSnprintf ( datatitle, sizeof ( datatitle ), "%c%c%c%c-%s-%d.%d.%d %d.dat", target->companyname [0], target->companyname [1],
 																			   target->companyname [2], target->companyname [3],
 																				missiontypestring [type-1], i );
 
@@ -2937,7 +2937,8 @@ bool MissionGenerator::IsMissionComplete_StealAllFiles ( Mission *mission, Perso
 	char *datatitle = mission->completionB;					// ALL
 	char *ourcompip = mission->completionC;
 	int numfiles, datasize;
-	sscanf ( mission->completionD, "%d %d", &numfiles, &datasize );
+	int day, month, year;
+        sscanf ( mission->completionD, "%d %d %d.%d.%d", &numfiles, &datasize, &day, &month, &year );
 	char *datatype	= mission->completionE;
 
 	//
@@ -2964,9 +2965,9 @@ bool MissionGenerator::IsMissionComplete_StealAllFiles ( Mission *mission, Perso
 	}
 
 	char stolendatatitle [64];
-	UplinkSnprintf ( stolendatatitle, sizeof ( stolendatatitle ), "%c%c%c%c-%s", target->companyname [0], target->companyname [1],
+	UplinkSnprintf ( stolendatatitle, sizeof ( stolendatatitle ), "%c%c%c%c-%s-%d.%d.%d", target->companyname [0], target->companyname [1],
 																  target->companyname [2], target->companyname [3],
-																  missiontypestring );
+																  missiontypestring, day, month, year );
 
 	//
 	// Lookup the dump computer

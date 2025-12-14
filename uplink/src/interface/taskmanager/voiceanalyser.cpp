@@ -335,6 +335,10 @@ void VoiceAnalyser::Tick ( int n )
 
 	if ( IsInterfaceVisible () ) {
 
+		// [UPLINKOS MOD FIX] Don't run when game is paused
+		if ( game->GameSpeed () <= GAMESPEED_PAUSED )
+			return;
+
 		int maxsample = 0;
 	
 		int pid = SvbLookupPID ( this );

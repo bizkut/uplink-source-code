@@ -1,42 +1,53 @@
-# UplinkOS Mod Fixes to Integrate
+# UplinkOS Mod Fixes - Integration Status
 
-This document tracks which fixes from the UplinkOS mod have been integrated into the Linux port.
+## Summary
+This document tracks which UplinkOS mod fixes have been integrated into the original Uplink Linux source code.
 
-## ✅ Completed
+## Phase 1: Bug Fixes (10/10 Complete ✅)
 
-| Fix | File | Description |
-|-----|------|-------------|
-| Bank Transfer Validation | `scriptlibrary.cpp:Script10` | Check all fields non-empty before transfer |
-| Stock Account Validation | `scriptlibrary.cpp:Script12` | Add username/password validation |
+### Applied Fixes
+| Fix | File | Status |
+|-----|------|--------|
+| Password_Breaker pause | `passwordbreaker.cpp` | ✅ Applied |
+| Decypher pause | `decypher.cpp` | ✅ Applied |
+| Voice_Analyzer pause | `voiceanalyser.cpp` | ✅ Applied |
+| LAN lock state display | `lan_interface.cpp` | ✅ Applied |
+| File delete security | `filedeleter.cpp` | ✅ Applied |
+| Bank loan interest delay | `notificationevent.cpp` | ✅ Applied |
 
-## ✅ Already in Original Source
+### Already in Original Source
+| Fix | File | Status |
+|-----|------|--------|
+| Bank transfer validation | `scriptlibrary.cpp` | Already present |
+| Stock account validation | `scriptlibrary.cpp` | Already present |
+| File download disconnect | `filecopier.cpp` | Already present |
+| Voice analyzer disconnect | `voiceanalyser.cpp` | Already present |
 
-| Fix | File | Notes |
-|-----|------|-------|
-| Log deletion null checks | `logdeleter.cpp` | ValidIndex checks present |
-| File download disconnect | `filecopier.cpp` | IsConnected() checks present |
-| Log deleter disconnect | `logdeleter.cpp` | IsConnected() checks present |
+## Phase 2: Gameplay Improvements (3/5 Complete)
 
-## ⏳ Pending - High Priority
+| Fix | File | Status |
+|-----|------|--------|
+| Log_Deleter v3 skip deleted | `logdeleter.cpp` | ✅ Applied |
+| Password_Breaker auto-submit | `passwordbreaker.cpp` | ✅ Applied |
+| StealAllFiles mission fix | `missiongenerator.cpp` | ✅ Applied (Adds dates to filenames) |
+| Apps CPU requirement | N/A | Investigated (Too complex/Risky - vanbakel library) |
+| Readonly accounts | N/A | Investigated (Setup seems correct in source) |
 
-| Fix | Original File | Notes |
-|-----|---------------|-------|
-| Password Breaker timing | `passwordbreaker.cpp` | Timing sync |
-| Voice Analyzer timing | `voiceanalyser.cpp` | Timing sync |
-| File download disconnect | `filecopier.cpp` | Connection state |
-| LAN lock states | `lan_interface.cpp` | State management |
+## Phase 3: Assets (Already Integrated)
 
-## ⏳ Pending - Nice to Have
+| Asset | Location | Status |
+|-------|----------|--------|
+| Gateway definitions | `bin/data/gatewaydefs.txt` | Identical ✅ |
+| Name lists | `bin/uplinkHD/*.txt` | Identical ✅ |
 
-| Fix | Notes |
-|-----|-------|
-| Disk space validation | Check before operations |
-| Hotkey externalization | XML config file |
-| Notes system | New feature |
-| Tour guide | New feature |
+## Build Status
+- **Binary:** `uplink/bin/uplink`
+- **Status:** ✅ Compiles and runs
+- **Total fixes applied:** 9 code changes
 
-## Source Reference
-
-The full categorized list is in the brain artifacts:
-- `mod_fixes_enhancements.md` - 116 fixes categorized
-- `code_change_analysis.md` - How to find changes in decompiled code
+## Not Applicable (Allegro5-Specific)
+The following UplinkOS fixes are specific to the Allegro5 rewrite and don't apply to the original SDL/OpenGL codebase:
+- UI scaling and resolution changes
+- New control scheme features
+- HD graphics assets
+- Timing adjustments for Allegro5 framework

@@ -26,6 +26,8 @@
 
 #include "world/world.h"
 #include "world/player.h"
+#include "world/vlocation.h"
+#include "world/computer/computer.h"
 #include "world/computer/databank.h"
 
 #include "mmgr.h"
@@ -90,6 +92,17 @@ void FileDeleter::SetTarget ( UplinkObject *uo, char *uos, int uoi )
 	if ( status == FILEDELETER_OFF ) {
 
 		if ( uo->GetOBJECTID () == OID_DATABANK ) {
+
+			// [UPLINKOS MOD FIX] Check if proxy/firewall is running before allowing deletion
+			// Get the remote computer and check security
+			VLocation *vl = game->GetWorld ()->GetPlayer ()->GetRemoteHost ();
+			if ( vl ) {
+				Computer *comp = vl->GetComputer ();
+				if ( comp && (comp->security.IsRunning_Proxy () || comp->security.IsRunning_Firewall ()) ) {
+					// Security system is running - cannot delete files
+					return;
+				}
+			}
 
 			// Databank selected
 
