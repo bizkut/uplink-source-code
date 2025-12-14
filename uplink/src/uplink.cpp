@@ -72,6 +72,9 @@
 
 #include "mmgr.h"
 
+// HD UI Mode
+#include "hd_ui/hd_screens.h"
+
 // ============================================================================
 // Initialisation functions
 
@@ -1160,6 +1163,10 @@ void Init_Graphics ()
 	Options *o = app->GetOptions ();
 	o->SetThemeName ( o->GetThemeName() );
 }
+
+    // [HDUI] Initialize HD UI mode if enabled
+    // Check for --hdui command line flag or config option
+    // HDUI::HDUIManager::GetInstance().Initialize(1920, 1080, false);
 
 void Init_Fonts	()
 {
