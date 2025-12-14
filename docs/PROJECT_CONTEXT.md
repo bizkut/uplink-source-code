@@ -6,6 +6,18 @@ This document provides context for AI agents and developers working on the Uplin
 
 **Uplink** is a 2001 hacking simulation game by Introversion Software. This is the **official source code** released for Linux, with modifications from the **UplinkOS mod** (Windows) being integrated.
 
+## ⚠️ CRITICAL AGENT INSTRUCTIONS
+
+**ALWAYS REFER TO THE DECOMPILED MOD CODE (`uplink/mod/UplinkOS.exe.c`) FIRST.**
+
+When investigating features, bugs, or logic from the UplinkOS mod:
+1.  **Do not guess** implementation details.
+2.  **Search** the decompiled C code using unique string literals, error messages, or constant values.
+3.  **Compare** the mod's logic side-by-side with the original source.
+4.  **Replicate** the exact logic used in the mod where appropriate.
+
+The decompiled code is the **primary source of truth** for all functional changes.
+
 ## Directory Structure
 
 ```

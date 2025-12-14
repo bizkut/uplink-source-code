@@ -3,6 +3,10 @@
 ## Summary
 This document tracks which UplinkOS mod fixes have been integrated into the original Uplink Linux source code.
 
+> **Note for Developers/Agents:**  
+> All fixes must be verified against the decompiled mod code (`uplink/mod/UplinkOS.exe.c`), which serves as the primary reference for this integration.
+
+
 ## Phase 1: Bug Fixes (10/10 Complete ✅)
 
 ### Applied Fixes
