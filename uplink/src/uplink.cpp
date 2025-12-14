@@ -1166,7 +1166,7 @@ void Init_Graphics ()
 
     // [HDUI] Initialize HD UI mode if enabled
     // Check for --hdui command line flag or config option
-    // // HDUI::HDUIManager::GetInstance().Initialize(1920, 1080, false); // [TODO] Enable after SDL removal
+    //     HDUI::HDUIManager::GetInstance().Initialize(1920, 1080, false);
 
 void Init_Fonts	()
 {
@@ -1242,7 +1242,7 @@ void Init_OpenGL ( int argc, char **argv )
 
 
         // [HDUI] Initialize HD UI mode (Allegro5)
-        // HDUI::HDUIManager::GetInstance().Initialize(1920, 1080, false); // [TODO] Enable after SDL removal
+        HDUI::HDUIManager::GetInstance().Initialize(1920, 1080, false);
 
 	app->GetOptions ()->SetOptionValue ( "crash_graphicsinit", 0, "", true, false );
 	app->GetOptions ()->Save ( NULL );
@@ -1319,7 +1319,7 @@ void Cleanup_Uplink() {
 
 
         // [HDUI] Shutdown HD UI
-        // HDUI::HDUIManager::GetInstance().Shutdown(); // [TODO] Enable after SDL removal
+        HDUI::HDUIManager::GetInstance().Shutdown(); // [TODO] Enable after SDL removal
 #if defined(FULLGAME) || defined(TESTGAME)
 #if defined(WIN32)
 	Cleanup_Steam ();
