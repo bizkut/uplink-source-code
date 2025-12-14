@@ -344,6 +344,7 @@ HDUIManager::~HDUIManager() {
 }
 
 bool HDUIManager::Initialize(int width, int height, bool fullscreen) {
+    printf("DEBUG: HDUIManager::Initialize called\n"); fflush(stdout);
     if (hdModeActive) return true;
     
     // Initialize Allegro5
