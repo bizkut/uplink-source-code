@@ -366,6 +366,7 @@ bool HDUIManager::Initialize(int width, int height, bool fullscreen) {
     
     // Create screen instances
     mainMenu = std::unique_ptr<HD_MainMenu>(new HD_MainMenu());
+    mainMenu->Create(); // Load the layout
     topBar = std::unique_ptr<HD_TopBar>(new HD_TopBar());
     taskBar = std::unique_ptr<HD_TaskBar>(new HD_TaskBar());
     
