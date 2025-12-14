@@ -101,8 +101,9 @@ bool Allegro5System::Initialize(int width, int height, bool fullscreen) {
         }
     }
     
-    screenWidth = width;
-    screenHeight = height;
+    // Get actual display dimensions
+    screenWidth = al_get_display_width(display);
+    screenHeight = al_get_display_height(display);
     
     // Create timer (60 FPS)
     timer = al_create_timer(1.0 / 60.0);
@@ -187,8 +188,9 @@ int Allegro5System::GetHeight() {
 }
 
 void Allegro5System::SetDisplaySize(int width, int height) {
-    screenWidth = width;
-    screenHeight = height;
+    // Get actual display dimensions
+    screenWidth = al_get_display_width(display);
+    screenHeight = al_get_display_height(display);
     scaleX = (float)screenWidth / (float)baseWidth;
     scaleY = (float)screenHeight / (float)baseHeight;
 }
