@@ -78,13 +78,23 @@ bool Allegro5System::Initialize(int width, int height, bool fullscreen) {
     al_set_new_display_option(ALLEGRO_SAMPLES, 4, ALLEGRO_SUGGEST);
     
     // Create display
-    display = al_create_display(width, height);
+    // Use gucci's display instead of creating a new one
+    display = al_get_current_display();
+    if (!display) {
+        fprintf(stderr, "HD_UI: No current display, creating one...\\n");
+        display = al_create_display(width, height);
+    }
     if (!display) {
         fprintf(stderr, "HD_UI: Failed to create display!\n");
         // Try safe mode without multisampling
         al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS, 0, ALLEGRO_SUGGEST);
         al_set_new_display_option(ALLEGRO_SAMPLES, 0, ALLEGRO_SUGGEST);
+        // Use gucci's display instead of creating a new one
+    display = al_get_current_display();
+    if (!display) {
+        fprintf(stderr, "HD_UI: No current display, creating one...\\n");
         display = al_create_display(width, height);
+    }
         if (!display) {
             fprintf(stderr, "HD_UI: Failed to create display even in safe mode!\n");
             return false;
