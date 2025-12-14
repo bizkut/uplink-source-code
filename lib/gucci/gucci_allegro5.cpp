@@ -265,6 +265,8 @@ void GciMainLoop()
   finished = false;
 
   while (!finished) {
+    // Set OpenGL context before rendering
+    al_set_target_backbuffer(display);
     if (gciDisplayHandlerP)
       (*gciDisplayHandlerP)();
 
