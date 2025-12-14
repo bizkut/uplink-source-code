@@ -4,7 +4,9 @@
 
 #include "hd_screens.h"
 #include "hd_allegro5.h"
+#include "hd_atlas.h"
 #include <cstdio>
+
 
 namespace HDUI {
 
@@ -352,6 +354,11 @@ bool HDUIManager::Initialize(int width, int height, bool fullscreen) {
     mgr.SetLayoutDirectory("uplinkHD/layouts");
     mgr.SetAssetDirectory("uplinkHD/graphics");
     
+    // Load texture atlases
+    AtlasManager& atlas = AtlasManager::GetInstance();
+    atlas.SetBasePath("uplinkHD/graphics/");
+    atlas.LoadAtlas("uplinkHD_atlas_00.xml");
+    
     // Set base resolution for scaling
     Allegro5System::SetBaseResolution(1920, 1080);
     
@@ -365,6 +372,7 @@ bool HDUIManager::Initialize(int width, int height, bool fullscreen) {
     
     return true;
 }
+
 
 void HDUIManager::Shutdown() {
     if (!hdModeActive) return;

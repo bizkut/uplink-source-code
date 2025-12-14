@@ -179,6 +179,7 @@ public:
     
     std::string file;
     void* bitmap; // ALLEGRO_BITMAP*, stored as void* to avoid header dep
+    bool ownsbitmap; // True if we own the bitmap (not from atlas)
     
     void Draw() override;
     void LoadBitmap(const std::string& basePath);

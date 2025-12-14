@@ -4,7 +4,9 @@
 
 #include "hd_ui_object.h"
 #include "hd_allegro5.h"
+#include "hd_atlas.h"
 #include <algorithm>
+
 
 namespace HDUI {
 
@@ -276,13 +278,15 @@ void UITextPoint::Draw() {
 UIImage::UIImage()
     : UIObject()
     , bitmap(nullptr)
+    , ownsbitmap(false)
 {}
 
 UIImage::~UIImage() {
-    if (bitmap) {
+    // Only destroy if we own the bitmap (not from atlas)
+    if (bitmap && ownsbitmap) {
         al_destroy_bitmap((ALLEGRO_BITMAP*)bitmap);
-        bitmap = nullptr;
     }
+    bitmap = nullptr;
 }
 
 void UIImage::Draw() {
@@ -298,9 +302,20 @@ void UIImage::Draw() {
 }
 
 void UIImage::LoadBitmap(const std::string& basePath) {
+    // First try to get from atlas
+    ALLEGRO_BITMAP* atlasTex = AtlasManager::GetInstance().GetTexture(file);
+    if (atlasTex) {
+        bitmap = (void*)atlasTex;
+        ownsbitmap = false; // Atlas owns this bitmap
+        return;
+    }
+    
+    // Fallback: load individual file
     std::string fullPath = basePath + "/" + file;
     bitmap = (void*)Allegro5System::LoadBitmap(fullPath.c_str());
+    ownsbitmap = (bitmap != nullptr); // We own if we loaded it
 }
+
 
 // ============================================================================
 // UIButtonStandard
