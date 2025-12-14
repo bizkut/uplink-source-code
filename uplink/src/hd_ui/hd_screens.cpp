@@ -84,6 +84,7 @@ HD_MainMenu::~HD_MainMenu() {
 }
 
 void HD_MainMenu::Create() {
+    printf("HD_MainMenu::Create called, layoutName=%s\n", layoutName.c_str());
     HDScreen::Create();
     SetupCallbacks();
     
@@ -353,8 +354,8 @@ bool HDUIManager::Initialize(int width, int height, bool fullscreen) {
     
     // Set up layout paths
     LayoutManager& mgr = LayoutManager::GetInstance();
-    mgr.SetLayoutDirectory("mod/layouts");
-    mgr.SetAssetDirectory("mod/graphics");
+    mgr.SetLayoutDirectory("uplinkHD/layouts");
+    mgr.SetAssetDirectory("uplinkHD/graphics");
     
     // Load texture atlases
     AtlasManager& atlas = AtlasManager::GetInstance();
