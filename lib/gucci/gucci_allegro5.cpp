@@ -408,7 +408,7 @@ void GciDeleteGraphicsLibrary()
 
 // Additional required functions
 
-char *GciInitGraphicsLibrary(int graphics_flags)
+char *GciInitGraphicsLibrary_simple(int graphics_flags)
 {
   bool debugging = (graphics_flags & GCI_DEBUGSTART) != 0;
 
@@ -498,3 +498,34 @@ bool GciAppVisible()
   return true;
 }
 
+
+// Proper 1-arg version that sets up Allegro5 core
+char *GciInitGraphicsLibrary(int graphics_flags)
+{
+  bool debugging = (graphics_flags & GCI_DEBUGSTART) != 0;
+
+  if (debugging) printf("Initialising Allegro5...");
+
+  if (!al_init()) {
+    return strdup("Could not initialize Allegro5");
+  }
+
+  // Initialize all addons
+  al_init_primitives_addon();
+  al_init_font_addon();
+  al_init_ttf_addon();
+  al_init_image_addon();
+  
+  if (!al_install_keyboard()) {
+    return strdup("Could not install Allegro5 keyboard");
+  }
+  
+  if (!al_install_mouse()) {
+    return strdup("Could not install Allegro5 mouse");
+  }
+
+  if (debugging) printf("done\n ");
+
+  _GciIsInitGraphicsLibrary = true;
+  return NULL;
+}
