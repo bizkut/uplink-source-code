@@ -102,7 +102,7 @@ void HD_MainMenu::Update(float dt) {
 void HD_MainMenu::Draw() {
     // DEBUG: yellow rect to verify we reach here
     Allegro5System::DrawRectFilled(200, 200, 200, 200, 1.0f, 1.0f, 0.0f, 1.0f);
-    if (!visible) return;
+    // if (!visible) return; // Disabled for testing
     
     // Draw dark gradient background
     Allegro5System::Clear(0.043f, 0.043f, 0.043f, 1.0f); // #0B0B0B
