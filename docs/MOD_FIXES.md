@@ -34,8 +34,9 @@ This document tracks which UplinkOS mod fixes have been integrated into the orig
 | Log_Deleter v3 skip deleted | `logdeleter.cpp` | ✅ Applied |
 | Password_Breaker auto-submit | `passwordbreaker.cpp` | ✅ Applied |
 | StealAllFiles mission fix | `missiongenerator.cpp` | ✅ Applied (Adds dates to filenames) |
+| Mission generation frequency | `data.h` | ✅ Applied (12h -> 8h) |
+| Readonly accounts | `filedeleter.cpp`, `logdeleter.cpp`, `filecopier.cpp` | ✅ Applied (Restricts Write/Delete for level > 2) |
 | Apps CPU requirement | N/A | Investigated (Too complex/Risky - vanbakel library) |
-| Readonly accounts | N/A | Investigated (Setup seems correct in source) |
 
 ## Phase 3: Assets (Already Integrated)
 

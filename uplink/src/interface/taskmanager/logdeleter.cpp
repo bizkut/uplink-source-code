@@ -133,10 +133,16 @@ void LogDeleter::SetTarget ( UplinkObject *uo, char *uos, int uoi )
 
 			MoveTo ( button->x, button->y, 1000 );
 
-			Computer *comp = game->GetInterface ()->GetRemoteInterface ()->GetComputerScreen ()->GetComputer ();
-			UplinkAssert (comp);
+                        Computer *comp = game->GetInterface ()->GetRemoteInterface ()->GetComputerScreen ()->GetComputer ();
+                        UplinkAssert (comp);
 
-			if ( comp->security.IsRunning_Monitor () ) 	
+                        // [UPLINKOS MOD FIX] ReadOnly accounts cannot delete logs
+                        if ( game->GetInterface ()->GetRemoteInterface ()->security_level > 2 ) {
+                             create_msgbox ( "Error", "Access Denied\nInsufficient Security Level" );
+                             return;
+                        }
+
+                        if ( comp->security.IsRunning_Monitor () )	 	
 				game->GetWorld ()->GetPlayer ()->GetConnection ()->BeginTrace ();
 
 		}

@@ -383,7 +383,7 @@ const int PROB_MISSION_TRACEUSER []         =          {  0,  0,  0,  0,  0,  0,
 #define     TIME_ARCBUSTED_WITHPLAYER           15 MINUTES                          // Player has this long to plant Revelation
 #define     TIME_ARCBUSTED_WITHOUTPLAYER        10 MINUTES                          // Player must defend against Revelation for this long
 
-#define		FREQUENCY_GENERATENEWMISSION		12 HOURS
+#define		FREQUENCY_GENERATENEWMISSION		8 HOURS
 #define		FREQUENCY_CHECKFORSECURITYBREACHES	8 HOURS
 #define		FREQUENCY_CHECKMISSIONDUEDATES		1 DAYS
 #define		FREQUENCY_GIVEMISSIONTONPC			8 HOURS

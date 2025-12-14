@@ -23,6 +23,7 @@
 #include "interface/interface.h"
 #include "interface/taskmanager/taskmanager.h"
 #include "interface/taskmanager/filecopier.h"
+#include "interface/remoteinterface/remoteinterface.h"
 
 #include "world/world.h"
 #include "world/player.h"
@@ -138,6 +139,15 @@ void FileCopier::SetTarget ( UplinkObject *uo, char *uos, int uoi )
 		Data *datacopy = new Data ( data );
 
 		if ( uo->GetOBJECTID () == OID_DATABANK ) {
+
+            // [UPLINKOS MOD FIX] ReadOnly accounts cannot upload files
+            if ( strstr ( uos, "fileserverscreen" ) ) {
+                 if ( game->GetInterface ()->GetRemoteInterface ()->security_level > 2 ) {
+                      create_msgbox ( "Error", "Access Denied\nInsufficient Security Level" );
+                      delete datacopy;
+                      return;
+                 }
+            }
 
 			// Copying the file into a memory bank
 			// Target memory area selected

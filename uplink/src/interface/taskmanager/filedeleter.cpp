@@ -23,6 +23,7 @@
 #include "interface/interface.h"
 #include "interface/taskmanager/taskmanager.h"
 #include "interface/taskmanager/filedeleter.h"
+#include "interface/remoteinterface/remoteinterface.h"
 
 #include "world/world.h"
 #include "world/player.h"
@@ -102,6 +103,11 @@ void FileDeleter::SetTarget ( UplinkObject *uo, char *uos, int uoi )
 					// Security system is running - cannot delete files
 					return;
 				}
+                // [UPLINKOS MOD FIX] ReadOnly accounts cannot delete files
+                if ( game->GetInterface ()->GetRemoteInterface ()->security_level > 2 ) {
+                    create_msgbox ( "Error", "Access Denied\nInsufficient Security Level" );
+                    return;
+                }
 			}
 
 			// Databank selected
