@@ -1242,7 +1242,6 @@ void Init_OpenGL ( int argc, char **argv )
 
 
         // [HDUI] Initialize HD UI mode (Allegro5)
-        if (file_stdout) { fprintf(file_stdout, "DEBUG: About to call HDUIManager::Initialize\n"); fflush(file_stdout); }
         HDUI::HDUIManager::GetInstance().Initialize(1920, 1080, false);
 
 	app->GetOptions ()->SetOptionValue ( "crash_graphicsinit", 0, "", true, false );

@@ -315,116 +315,36 @@ HDUIManager::HDUIManager() : hdModeActive(false) {}
 HDUIManager::~HDUIManager() { Shutdown(); }
 
 bool HDUIManager::Initialize(int width, int height, bool fullscreen) {
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "w");
-    if (dbg) {
-      fprintf(dbg, "HDUIManager::Initialize START\n");
-      fclose(dbg);
-    }
-  }
-  printf("DEBUG: HDUIManager::Initialize called\n");
-  fflush(stdout);
   if (hdModeActive) {
-    fprintf(stderr, "HDUIManager: already active, returning\n");
     return true;
   }
 
   // Initialize Allegro5
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "About to call Allegro5System::Initialize\n");
-      fclose(dbg);
-    }
-  }
   if (!Allegro5System::Initialize(width, height, fullscreen)) {
-    {
-      FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-      if (dbg) {
-        fprintf(dbg, "Allegro5System::Initialize FAILED\n");
-        fclose(dbg);
-      }
-    }
     fprintf(stderr, "HDUIManager: Failed to initialize Allegro5\n");
     return false;
   }
 
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "Allegro5 init OK, setting up layouts...\n");
-      fclose(dbg);
-    }
-  }
   // Set up layout paths
   LayoutManager &mgr = LayoutManager::GetInstance();
   mgr.SetLayoutDirectory("uplinkHD/layouts");
   mgr.SetAssetDirectory("uplinkHD/graphics");
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "Layout paths set, loading atlas...\n");
-      fclose(dbg);
-    }
-  }
 
   // Load texture atlases
   AtlasManager &atlas = AtlasManager::GetInstance();
   atlas.SetBasePath("uplinkHD/graphics/");
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "Calling atlas.LoadAtlas...\n");
-      fclose(dbg);
-    }
-  }
   atlas.LoadAtlas("uplinkHD_atlas_00.xml");
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "Atlas loaded, setting base resolution...\n");
-      fclose(dbg);
-    }
-  }
 
   // Set base resolution for scaling
   Allegro5System::SetBaseResolution(1920, 1080);
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "Creating mainMenu...\n");
-      fclose(dbg);
-    }
-  }
 
   // Create screen instances
   mainMenu = std::unique_ptr<HD_MainMenu>(new HD_MainMenu());
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "Calling mainMenu->Create()...\n");
-      fclose(dbg);
-    }
-  }
   mainMenu->Create(); // Load the layout
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "mainMenu created, creating topBar and taskBar...\n");
-      fclose(dbg);
-    }
-  }
   topBar = std::unique_ptr<HD_TopBar>(new HD_TopBar());
   taskBar = std::unique_ptr<HD_TaskBar>(new HD_TaskBar());
 
   hdModeActive = true;
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "HDUIManager::Initialize COMPLETE! hdModeActive=true\n");
-      fclose(dbg);
-    }
-  }
   printf("HDUIManager: Initialized at %dx%d\n", width, height);
 
   return true;

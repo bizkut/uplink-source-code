@@ -22,25 +22,11 @@ float Allegro5System::scaleY = 1.0f;
 bool Allegro5System::initialized = false;
 
 bool Allegro5System::Initialize(int width, int height, bool fullscreen) {
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "Allegro5System::Initialize START\n");
-      fclose(dbg);
-    }
-  }
   if (initialized)
     return true;
 
   // Check if gucci already initialized Allegro5
   bool gucciInitialized = al_is_system_installed();
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "gucci initialized: %d\n", gucciInitialized);
-      fclose(dbg);
-    }
-  }
 
   if (!gucciInitialized) {
     // Initialize Allegro ourselves
@@ -82,22 +68,8 @@ bool Allegro5System::Initialize(int width, int height, bool fullscreen) {
     }
   }
 
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "Getting display via al_get_current_display...\n");
-      fclose(dbg);
-    }
-  }
   // Get display - use gucci's existing display
   display = al_get_current_display();
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "display=%p\n", (void *)display);
-      fclose(dbg);
-    }
-  }
   if (!display) {
     fprintf(stderr, "HD_UI: No current display available!\n");
     return false;
@@ -106,13 +78,6 @@ bool Allegro5System::Initialize(int width, int height, bool fullscreen) {
   // Get actual display dimensions
   screenWidth = al_get_display_width(display);
   screenHeight = al_get_display_height(display);
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "Screen: %dx%d\n", screenWidth, screenHeight);
-      fclose(dbg);
-    }
-  }
 
   // Skip timer and event queue creation when gucci manages them
   // We just use the existing Allegro5 context for drawing
@@ -120,13 +85,6 @@ bool Allegro5System::Initialize(int width, int height, bool fullscreen) {
   // Calculate scaling
   scaleX = (float)screenWidth / (float)baseWidth;
   scaleY = (float)screenHeight / (float)baseHeight;
-  {
-    FILE *dbg = fopen("/tmp/hdui_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "Allegro5System::Initialize completing!\n");
-      fclose(dbg);
-    }
-  }
 
   initialized = true;
   printf("HD_UI: Allegro5 initialized at %dx%d (gucci=%d)\n", screenWidth,
