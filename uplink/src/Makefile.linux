@@ -21,7 +21,8 @@ INCLUDES = 	-I.					\
 		-I$(CONTRIB_DIR)/include		\
 		-I$(CONTRIB_DIR)/FTGL-2.1.2/include	\
 		-I$(IRCLIB_DIR)				\
-		-I$(IRCLIB_DIR)/linux
+		-I$(IRCLIB_DIR)/linux			\
+		$(shell pkg-config --cflags allegro-5 allegro_font-5 allegro_ttf-5 allegro_image-5 allegro_primitives-5 2>/dev/null)
 
 LIBS_INCLUDES = \
 	-L ../../lib/soundgarden \
@@ -54,7 +55,10 @@ LIBS = \
 	-lfreetype \
 	-ltiff \
 	-ljpeg \
-	-lz 
+	-lz \
+	$(shell pkg-config --libs allegro-5 allegro_font-5 allegro_ttf-5 allegro_image-5 allegro_primitives-5 2>/dev/null) \
+	-ltinyxml2
+
 #	-lgltt \
 #	-lttf \
 
@@ -83,6 +87,9 @@ app/opengl_interface.cpp \
 app/probability.cpp \
 app/serialise.cpp \
 app/uplinkobject.cpp \
+hd_ui/hd_allegro5.cpp \
+hd_ui/hd_ui_object.cpp \
+hd_ui/hd_layout_parser.cpp \
 game/data/data.cpp \
 game/game.cpp \
 game/gameobituary.cpp \

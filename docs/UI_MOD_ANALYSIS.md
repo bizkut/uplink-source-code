@@ -120,12 +120,23 @@ This is a **custom XML-based UI framework** for Allegro5 that:
 1. ⚠️ Implement hotkey system inspired by `default_hotkeys.xml`
 2. ⚠️ Port LAN improvements if identifiable in decompiled code
 
-### High Effort (Major Rewrite)
-1. ❌ XML UI system - Would require new framework
-2. ❌ HD graphics - Would need to rebuild rendering
+### High Effort (Major Rewrite) - IN PROGRESS ✅
+1. ✅ XML UI system - Framework created (`hd_ui/hd_layout_parser.cpp`)
+2. ✅ HD graphics - Allegro5 layer created (`hd_ui/hd_allegro5.cpp`)
+3. ⏳ Screen migration (MainMenu, TopBar, TaskBar) - Pending
+
+## Files Created
+
+| File | Purpose |
+|------|---------|
+| `hd_ui/hd_allegro5.cpp/h` | Allegro5 display, events, primitives |
+| `hd_ui/hd_ui_object.cpp/h` | Widget classes (Container, Gradient, etc.) |
+| `hd_ui/hd_layout_parser.cpp/h` | TinyXML2 XML layout parser |
 
 ## Files for Reference
 
 - Mod changelog: `uplink/mod/UplinkOS_ReadMe.txt`
+- Decompiled source: `uplink/mod/UplinkOS.exe.c`
 - Gateway defs: `uplink/mod/data/gatewaydefs.txt`
 - Hotkeys: `uplink/mod/uplinkHD/default_hotkeys.xml`
+

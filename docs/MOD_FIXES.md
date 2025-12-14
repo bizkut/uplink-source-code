@@ -45,14 +45,21 @@ This document tracks which UplinkOS mod fixes have been integrated into the orig
 | Gateway definitions | `bin/data/gatewaydefs.txt` | Identical ✅ |
 | Name lists | `bin/uplinkHD/*.txt` | Identical ✅ |
 
-## Build Status
-- **Binary:** `uplink/bin/uplink`
-- **Status:** ✅ Compiles and runs
-- **Total fixes applied:** 9 code changes
+## Phase 4: HD UI Port (In Progress)
 
-## Not Applicable (Allegro5-Specific)
-The following UplinkOS fixes are specific to the Allegro5 rewrite and don't apply to the original SDL/OpenGL codebase:
-- UI scaling and resolution changes
-- New control scheme features
-- HD graphics assets
-- Timing adjustments for Allegro5 framework
+Porting the UplinkOS mod's Allegro5-based HD UI framework.
+
+| Component | Files | Status |
+|-----------|-------|--------|
+| Allegro5 graphics layer | `hd_ui/hd_allegro5.cpp/h` | ✅ Complete |
+| Widget classes | `hd_ui/hd_ui_object.cpp/h` | ✅ Complete |
+| TinyXML2 layout parser | `hd_ui/hd_layout_parser.cpp/h` | ✅ Complete |
+| HD layouts/fonts copied | `bin/uplinkHD/` | ✅ Complete |
+| MainMenu integration | TBD | ⏳ Pending |
+| TopBar/TaskBar migration | TBD | ⏳ Pending |
+
+## Build Status
+- **Binary:** `uplink/src/uplink.full`
+- **Status:** ✅ Compiles with Allegro5 + TinyXML2
+- **Total fixes applied:** 9 code changes + HD UI framework
+
