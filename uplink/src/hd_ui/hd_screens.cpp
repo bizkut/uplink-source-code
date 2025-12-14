@@ -375,7 +375,7 @@ bool HDUIManager::Initialize(int width, int height, bool fullscreen) {
 
 
 void HDUIManager::Shutdown() {
-    if (!hdModeActive) return;
+    // if (!hdModeActive) return; // Disabled for testing
     
     mainMenu.reset();
     topBar.reset();
@@ -389,7 +389,7 @@ void HDUIManager::Shutdown() {
 }
 
 void HDUIManager::Update(float dt) {
-    if (!hdModeActive) return;
+    // if (!hdModeActive) return; // Disabled for testing
     
     if (mainMenu && mainMenu->IsVisible()) mainMenu->Update(dt);
     if (topBar && topBar->IsVisible()) topBar->Update(dt);
@@ -399,7 +399,7 @@ void HDUIManager::Update(float dt) {
 void HDUIManager::Draw() {
     // DEBUG: Draw green rect to verify HD UI Draw is called
     Allegro5System::DrawRectFilled(150, 150, 200, 200, 0.0f, 1.0f, 0.0f, 1.0f);
-    if (!hdModeActive) return;
+    // if (!hdModeActive) return; // Disabled for testing
     
     Allegro5System::BeginFrame();
     
