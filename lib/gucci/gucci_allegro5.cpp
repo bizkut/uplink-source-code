@@ -119,8 +119,8 @@ char *GciInitGraphicsLibrary(int graphics_flags,
   al_set_new_display_flags(flags);
   
   // OpenGL 2.1 for compatibility with existing code
-  al_set_new_display_option(ALLEGRO_OPENGL_MAJOR_VERSION, 2, ALLEGRO_SUGGEST);
-  al_set_new_display_option(ALLEGRO_OPENGL_MINOR_VERSION, 1, ALLEGRO_SUGGEST);
+  // Legacy OpenGL - no version requirement
+  // al_set_new_display_option(ALLEGRO_OPENGL_MINOR_VERSION, 1, ALLEGRO_SUGGEST);
   
   // Create display
   display = al_create_display(screenWidth, screenHeight);
