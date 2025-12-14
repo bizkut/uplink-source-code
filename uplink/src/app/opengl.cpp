@@ -28,6 +28,7 @@
 
 #include "mainmenu/mainmenu.h"
 #include "mainmenu/mainmenuscreen.h"
+#include "hd_ui/hd_screens.h"
 
 #include "view/view.h"
 
@@ -357,7 +358,8 @@ void display(void)
                     glVertex2f(300.0f, 300.0f);
                     glVertex2f(100.0f, 300.0f);
                 glEnd();
-		EclDrawAllButtons ();
+		// EclDrawAllButtons (); // Replaced by HD UI
+                HDUI::HDUIManager::GetInstance().Draw();
 
 		glPopAttrib ();
 		glPopMatrix ();
