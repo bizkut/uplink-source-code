@@ -90,6 +90,7 @@ app/uplinkobject.cpp \
 hd_ui/hd_allegro5.cpp \
 hd_ui/hd_ui_object.cpp \
 hd_ui/hd_layout_parser.cpp \
+hd_ui/hd_screens.cpp \
 game/data/data.cpp \
 game/game.cpp \
 game/gameobituary.cpp \
