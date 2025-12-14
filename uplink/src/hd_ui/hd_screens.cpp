@@ -397,6 +397,8 @@ void HDUIManager::Update(float dt) {
 }
 
 void HDUIManager::Draw() {
+    // DEBUG: Draw green rect to verify HD UI Draw is called
+    Allegro5System::DrawRectFilled(150, 150, 200, 200, 0.0f, 1.0f, 0.0f, 1.0f);
     if (!hdModeActive) return;
     
     Allegro5System::BeginFrame();
