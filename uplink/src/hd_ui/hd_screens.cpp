@@ -403,7 +403,7 @@ void HDUIManager::Draw() {
     
     Allegro5System::BeginFrame();
     
-    if (mainMenu && mainMenu->IsVisible()) mainMenu->Draw();
+    if (mainMenu) mainMenu->Draw(); // Force draw for testing
     if (topBar && topBar->IsVisible()) topBar->Draw();
     if (taskBar && taskBar->IsVisible()) taskBar->Draw();
     
