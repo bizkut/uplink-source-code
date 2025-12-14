@@ -111,9 +111,9 @@ char *GciInitGraphicsLibrary(int graphics_flags,
                         screenWidth, screenHeight, screenDepth);
 
   // Set display flags (ALLEGRO_OPENGL for OpenGL rendering)
-  int flags = ALLEGRO_OPENGL | ALLEGRO_WINDOWED;
+  int flags = ALLEGRO_OPENGL | ALLEGRO_OPENGL_3_0 | ALLEGRO_WINDOWED;
   if (graphics_flags & GCI_FULLSCREEN) {
-    flags = ALLEGRO_OPENGL | ALLEGRO_FULLSCREEN_WINDOW;
+    flags = ALLEGRO_OPENGL | ALLEGRO_OPENGL_3_0 | ALLEGRO_FULLSCREEN_WINDOW;
   }
   
   al_set_new_display_flags(flags);
