@@ -353,8 +353,8 @@ bool HDUIManager::Initialize(int width, int height, bool fullscreen) {
     
     // Set up layout paths
     LayoutManager& mgr = LayoutManager::GetInstance();
-    mgr.SetLayoutDirectory("uplinkHD/layouts");
-    mgr.SetAssetDirectory("uplinkHD/graphics");
+    mgr.SetLayoutDirectory("mod/layouts");
+    mgr.SetAssetDirectory("mod/graphics");
     
     // Load texture atlases
     AtlasManager& atlas = AtlasManager::GetInstance();
