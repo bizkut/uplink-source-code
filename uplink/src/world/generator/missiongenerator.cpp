@@ -507,7 +507,7 @@ Mission *MissionGenerator::Generate_StealAllFiles ( Company *employer, Computer 
 	char completionA [SIZE_VLOCATION_IP];								// IP
 	char completionB [SIZE_DATA_TITLE];									// Data title or ALL
 	char completionC [SIZE_VLOCATION_IP];								// IP of our dump machine
-	char completionD [8];												// Numfiles TotalSize
+	char completionD [32];												// Numfiles TotalSize
 	char completionE [16];												// TYPE of data
 
 	char whoisthetarget [128];
