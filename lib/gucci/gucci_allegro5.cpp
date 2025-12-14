@@ -86,23 +86,27 @@ char *GciInitGraphicsLibrary(int graphics_flags,
 
   if (debugging) printf("Initialising Allegro5...");
 
-  // Initialize Allegro5
-  if (!al_init()) {
-    return strdup("Could not initialize Allegro5");
-  }
+  // Initialize Allegro5 (skip if already done by 1-arg version)
+  static bool allegro_core_init = false;
+  if (!allegro_core_init) {
+    if (!al_init()) {
+      return strdup("Could not initialize Allegro5");
+    }
 
-  // Initialize addons
-  al_init_primitives_addon();
-  al_init_font_addon();
-  al_init_ttf_addon();
-  al_init_image_addon();
+    // Initialize addons
+    al_init_primitives_addon();
+    al_init_font_addon();
+    al_init_ttf_addon();
+    al_init_image_addon();
   
-  if (!al_install_keyboard()) {
-    return strdup("Could not install Allegro5 keyboard");
-  }
+    if (!al_install_keyboard()) {
+      return strdup("Could not install Allegro5 keyboard");
+    }
   
-  if (!al_install_mouse()) {
-    return strdup("Could not install Allegro5 mouse");
+    if (!al_install_mouse()) {
+      return strdup("Could not install Allegro5 mouse");
+    }
+    allegro_core_init = true;
   }
 
   if (debugging) printf("done\n");
