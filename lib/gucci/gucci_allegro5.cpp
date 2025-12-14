@@ -132,11 +132,18 @@ char *GciInitGraphicsLibrary(int graphics_flags,
     return strdup("Could not create Allegro5 display");
   }
 
+  // Explicitly set OpenGL viewport to full display size
+  glViewport(0, 0, screenWidth, screenHeight);
+  
+  // Clear any OpenGL errors
+  glGetError();
+
   if (debugging) printf("done\n");
   if (debugging) printf(" Allegro5 is now changing the window caption and diverse settings ...");
 
   // Set window title
   al_set_window_title(display, caption);
+
 
   // Create event queue
   eventQueue = al_create_event_queue();
