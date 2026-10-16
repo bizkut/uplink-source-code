@@ -11,6 +11,7 @@ Ubuntu 24.04 dependencies
   sudo apt-get update
   sudo apt-get install -y \
     build-essential pkg-config autoconf automake libtool \
+    ca-certificates curl desktop-file-utils file patchelf \
     libx11-dev libxext-dev libgl1-mesa-dev libglu1-mesa-dev \
     libsdl1.2-dev libsdl-mixer1.2-dev \
     libfreetype-dev libtiff-dev libjpeg-dev zlib1g-dev \
@@ -39,6 +40,22 @@ Deploy and run
 
 Running from `uplink/bin` is required. The program loads `data.dat`, the other
 archive files, and `uplinkHD/` relative to the executable path.
+
+AppImage
+--------
+
+After building `uplink.full`, create the self-contained x86_64 AppImage with:
+
+  packaging/appimage/build-appimage.sh uplink/src/uplink.full dist
+
+The script downloads the official linuxdeploy x86_64 AppImage and verifies its
+pinned SHA-256 before execution. The output is
+`dist/UplinkOS-GOLD-v1.04-x86_64.AppImage` plus its checksum.
+
+The AppImage contains all ten runtime data archives, the unpacked `data/` and
+`music/` directories, and the complete `uplinkHD/` tree as regular files.
+Nothing in the package points back into the source checkout. If FUSE is
+unavailable, launch it with `APPIMAGE_EXTRACT_AND_RUN=1`.
 
 User data
 ---------

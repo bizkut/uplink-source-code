@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=UplinkOS GOLD
+Comment=UplinkOS GOLD hacking simulation
+Exec=uplink
+Icon=uplink
+Terminal=false
+Categories=Game;Simulation;
+Keywords=hacking;simulation;strategy;
+StartupWMClass=UplinkOS

@@ -35,9 +35,11 @@ The executable must run from `uplink/bin`; that directory contains the data arch
 
 `.github/workflows/linux-build.yml` builds the complete source on Ubuntu 24.04
 for pushes to `master`, pull requests, and manual runs. It publishes a
-`uplinkos-gold-linux-x86_64` artifact containing a runnable `bin/` bundle, its
-SHA-256 checksum, and the build documentation. The package dereferences the
-tracked data-archive links and excludes Windows-only DLLs and runtime caches.
+`uplinkos-gold-linux-x86_64` artifact containing both a runnable `bin/` archive
+and an AppImage, with SHA-256 checksums and build documentation. Both packages
+embed the required data archives, unpacked data/music, and complete `uplinkHD`
+tree; neither depends on repository-relative symlinks. Windows-only DLLs,
+backup files, and runtime caches are excluded.
 
 ## Key paths
 
@@ -47,5 +49,6 @@ tracked data-archive links and excludes Windows-only DLLs and runtime caches.
 | `uplink/src/` | Original game plus recovered model, scheduler, catalog, and gameplay changes |
 | `uplink/mod/` | Authenticated target artifacts, decompiler output, layouts, localization database |
 | `uplink/bin/uplinkHD/` | Runtime layouts, fonts, graphics, sounds, names, default hotkeys |
+| `packaging/appimage/` | Reproducible AppImage metadata and complete runtime-data packager |
 | `docs/MOD_FIXES.md` | Evidence ledger, reconstructed behavior, verification, and limits |
 | `docs/UI_MOD_ANALYSIS.md` | HD architecture, complete surface coverage, and backend boundaries |

@@ -158,6 +158,12 @@ Ubuntu 24.04 container, native Linux executable:
     `BUILDING.linux` prerequisite sequence, installed the resulting executable,
     launched it with an empty home directory, observed the HD first-run surface,
     and exited normally with status 0.
+22. Built the x86_64 AppImage with checksum-pinned linuxdeploy and AppImage
+    runtime tools. Extracted contents byte-matched all ten data archives and
+    the complete `data/`, `music/`, and `uplinkHD/` trees with no external
+    runtime-data symlinks. The AppImage launched on a host where the unbundled
+    executable could not resolve SDL/Allegro, displayed the HD first-run
+    surface, and exited normally with status 0.
 
 Audio initialization reported no ALSA device in the headless container;
 rendering, input, saving, loading, and clean shutdown continued.
