@@ -10,7 +10,8 @@ class NameGenerator
 
 protected:
 
-	static LList <char *> fornames;
+	static LList <char *> fornamesM;
+	static LList <char *> fornamesF;
 	static LList <char *> surnames;
 	static LList <char *> agentaliases;
 	static LList <char *> companynamesA;
@@ -24,7 +25,7 @@ public:
     static void Shutdown ();
 
 	static char *GenerateCompanyName ();
-	static char *GeneratePersonName ();
+	static char *GeneratePersonName ( bool female );
 	static char *GenerateAgentAlias ();
 	static char *GenerateBankName ();
 		

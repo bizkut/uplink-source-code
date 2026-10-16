@@ -104,7 +104,7 @@ void opengl_initialise (int argc, char **argv)
 	}
 	delete mode;
 
-	char *errorMessageInit = GciInitGraphics( "uplink",
+	char *errorMessageInit = GciInitGraphics( "UplinkOS",
 			 graphics_flags, 
 			 screenWidth, screenHeight,
 			 screenDepth, screenRefresh,
@@ -346,25 +346,20 @@ void display(void)
 
 		glTranslatef ( 0.375f, 0.375f, 0.0f );
 
-		// Added by François for testing new display
+		// Added by FranÃ§ois for testing new display
 		EclClearRectangle ( 0, 0, app->GetOptions ()->GetOptionValue ( "graphics_screenwidth" ), 
 								  app->GetOptions ()->GetOptionValue ( "graphics_screenheight" ) );
         
-                // DEBUG: Test rectangle
-                glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
-                glBegin(GL_QUADS);
-                    glVertex2f(100.0f, 100.0f);
-                    glVertex2f(300.0f, 100.0f);
-                    glVertex2f(300.0f, 300.0f);
-                    glVertex2f(100.0f, 300.0f);
-                glEnd();
-		// EclDrawAllButtons (); // Replaced by HD UI
-                HDUI::HDUIManager::GetInstance().Draw();
+		EclDrawAllButtons ();
 
 		glPopAttrib ();
 		glPopMatrix ();
 		glMatrixMode ( GL_MODELVIEW );
 		glPopMatrix ();
+
+		HDUI::HDUIManager &hdUI = HDUI::HDUIManager::GetInstance();
+		if ( hdUI.IsHDModeActive() )
+			hdUI.Draw();
 
 		//  Swap the buffers, do it all again to the new back-buffer
 		GciSwapBuffers();

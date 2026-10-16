@@ -1,63 +1,60 @@
-*** BUILDING UPLINK ***
+BUILDING UPLINKOS GOLD ON LINUX
+===============================
 
-Contents:
+The supported build uses Allegro 5, TinyXML2, SDL 1.2/SDL_mixer, OpenGL,
+FreeType, and the bundled legacy libraries. Run commands from the repository
+root.
 
-1. Introduction
-2. Contrib
-3. Lib
-4. Source
+Ubuntu 24.04 dependencies
+-------------------------
 
-1. Introduction
+  sudo apt-get update
+  sudo apt-get install -y \
+    build-essential pkg-config autoconf automake libtool \
+    libx11-dev libxext-dev libgl1-mesa-dev libglu1-mesa-dev \
+    libsdl1.2-dev libsdl-mixer1.2-dev \
+    libfreetype-dev libtiff-dev libjpeg-dev zlib1g-dev \
+    liballegro5-dev liballegro-image5-dev liballegro-ttf5-dev \
+    libtinyxml2-dev
 
-Make sure that you are in $UPLINKROOT (the place where you copied all
-the files to, containing the directories contrib, lib, uplink, etc).
+Build
+-----
 
-Export the following environment variable to make cutting and pasting
-of commands easier:
+  make -C contrib/FTGL-2.1.2 -j4
+  make -C contrib/tcp4u.331/src -f ../Unix/Makefile -j4
+  make -C contrib/irclib -j4
+  make -C contrib/unrar -j4
+  make -C lib -j4
+  make -C uplink/src -f Makefile.linux -j4
 
-%  export UPLINKROOT=`pwd`
+`Makefile.linux` defines `USE_ALLEGRO5`; without that define the HD manager is
+compiled out and only the legacy Eclipse interface appears.
 
-2. Contrib
+Deploy and run
+--------------
 
--Needs autopackage, http://www.autopackage.org/
--Needs autoconf, automake, libtool, Debian: autoconf, automake1.9, libtool.
--Needs x11 headers and extensions, Debian: libx11-dev, libxext-dev.
--Needs OpenGL headers, Debian: libgl1-mesa-dev, libglu1-mesa-dev.
--Needs jpeg, Debian: libjpeg62-dev.
--For SDL and SDL_mixer, if you want to use ALSA sound layer you will make sure 
- that you have alsa development libraries installed (Debian: used to be 
- alsa-headers, now libasound2-dev), same for ESD (Debian: libesd0-dev).
--For loki, libxml (Debian: libxml-dev), gtk 1 (Debian: libgtk1.2-dev), 
- libglade (Debian: libglade0-dev), ncurses (Debian: libncurses5-dev).
+  install -m 755 uplink/src/uplink.full uplink/bin/uplink
+  cd uplink/bin
+  ./uplink
 
-%  cd $UPLINKROOT/contrib
-%  make
+Running from `uplink/bin` is required. The program loads `data.dat`, the other
+archive files, and `uplinkHD/` relative to the executable path.
 
-3. Lib
+User data
+---------
 
-%  cd $UPLINKROOT/lib
-%  make
+Linux profiles are written beneath `$HOME/.uplink/`:
 
-4. Source
+- `<agent>.usr` and `<agent>.tmp`: encrypted SAV67 profile and recovery copy
+- `<agent>_notes.xml`: UplinkOS notes
+- `<agent>_hotkeys.xml`: user hotkey overrides when changed
+- `options`: encrypted options
 
-%  cd $UPLINKROOT/uplink/src
-%  make
+A headless smoke run can use Xvfb. Missing ALSA hardware only disables audio; it
+does not prevent graphics or profile verification.
 
-Should produce uplink.full in $UPLINKROOT/uplink/src/ .
+Build products
+--------------
 
--To produce a easy testable version :
-
-%  cd $UPLINKROOT/uplink/src
-%  make dist-full
-
-Should produce uplink.bin.x86 in $UPLINKROOT/uplink/src/dist/full/uplink/lib
-with all needing libs and dat files.
-
--To produce a redistributable patch :
-
-%  cd $UPLINKROOT/uplink/src
-%  make dist-patch
-
-If you are using ALSA sound layer make sure that no other
-program has the sound device, otherwise Uplink will wait
-(indefinitely) for the sound device to become available.
+Objects, static archives, `uplink/src/uplink.full`, and the deployed
+`uplink/bin/uplink` are ignored build outputs. Do not commit them.

@@ -78,6 +78,17 @@ int Options::GetOptionValue ( char *name )
 
 }
 
+int Options::GetEffectiveOptionValue ( char *name )
+{
+	for ( int i = shutdownChanges.Size () - 1; i >= 0; --i ) {
+		if ( !shutdownChanges.ValidIndex (i) ) continue;
+		OptionChange *change = shutdownChanges.GetData (i);
+		if ( change && strcmp (change->name, name) == 0 )
+			return change->value;
+	}
+	return GetOptionValue (name);
+}
+
 bool Options::IsOptionEqualTo ( char *name, int value )
 {
 

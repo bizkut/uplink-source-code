@@ -104,8 +104,7 @@ void SendMailInterface::AttachFileClick ( Button *button )
 	
 	if ( data ) {
 	
-		Data *datacopy = new Data ( data );
-		m->AttachData ( datacopy );
+		m->AttachData ( data );
 		changed = true;
 
 	}

@@ -23,8 +23,8 @@
 
 	*/
 
-#define		WORLD_START_DATE				0, 0, 0, 24, 2, 2010	
-#define		GAME_START_DATE					0, 0, 0, 24, 3, 2010	// ;)
+#define		WORLD_START_DATE				0, 0, 0, 24, 2, 2026
+#define		GAME_START_DATE					0, 0, 0, 24, 3, 2026	// ;)
 
 
 #define		COMPANYSIZE_AVERAGE				20
@@ -411,7 +411,7 @@ struct ComputerUpgrade
 };
 
 
-#define NUM_STARTINGSOFTWAREUPGRADES 73
+#define NUM_STARTINGSOFTWAREUPGRADES 71
 #define NUM_STARTINGHARDWAREUPGRADES 19
 
 extern const ComputerUpgrade SOFTWARE_UPGRADES  [];

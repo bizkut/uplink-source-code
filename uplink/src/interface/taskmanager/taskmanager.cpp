@@ -46,6 +46,7 @@
 #include "interface/interface.h"
 #include "interface/remoteinterface/remoteinterface.h"
 #include "interface/taskmanager/taskmanager.h"
+#include "hd_ui/hd_app_windows.h"
 
 #include "mmgr.h"
 
@@ -70,6 +71,15 @@ TaskManager::~TaskManager ()
 
 void TaskManager::RunSoftware ( char *name, float version )
 {
+
+	// GOLD HD_App::Create 004ADD70 counts active instances by app name.
+	if ( !name ) return;
+	int instances = 0;
+	for ( int i = 0; i < SvbNumTasks (); ++i ) {
+		TaskWrapper *wrapper = SvbGetTaskWrapperAtIndex (i);
+		if ( wrapper && wrapper->name && strcmp (wrapper->name, name) == 0 ) ++instances;
+	}
+	if ( instances >= HDUI::AppInstanceLimit (name) ) return;
 
 	UplinkTask *task = NULL;
 
@@ -132,7 +142,11 @@ void TaskManager::RunSoftware ( char *name, float version )
 
 	task->SetVersion ( version );
 	int pid = SvbRegisterTask ( name, task );
-	SetTargetProgram ( pid );
+	if ( SvbGetTask (pid) ) {
+		SvbShowTask (pid);
+		HDUI::RefreshAppScheduling (pid);
+		SetTargetProgram (pid);
+	}
 
 }
 
@@ -145,10 +159,13 @@ void TaskManager::SetProgramTarget ( UplinkObject *newprogramtarget, char *targe
 	if ( programtarget && (targetprogram != -1) ) {
 
 		// Link the program to the target
-		UplinkTask *task = (UplinkTask *) SvbGetTask ( targetprogram );
-
-		if ( task )
-			task->SetTarget ( programtarget, targetstring, targetint );
+		const int pid = targetprogram;
+		UplinkTask *task = dynamic_cast<UplinkTask *> (SvbGetTask (pid));
+		if ( task ) {
+			task->SetTarget (programtarget, targetstring, targetint);
+			// SetTarget may delete its own task; only the PID crosses the call.
+			HDUI::RefreshAppScheduling (pid);
+		}
 
 		targetprogramreason = 1;
 		lasttargetprogram = targetprogram;
@@ -193,10 +210,9 @@ char *TaskManager::GetTargetProgramName ()
     
     if ( targetprogram != -1 ) {
         
-        TaskWrapper *tw = SvbGetTaskWrapper ( targetprogram );
-        UplinkAssert (tw);
-
-        return tw->name;
+		TaskWrapper *tw = SvbGetTaskWrapper (targetprogram);
+		if ( !tw ) { targetprogram = -1; return NULL; }
+		return tw->name;
 
     }
     else 
@@ -238,17 +254,20 @@ void TaskManager::Update ()
 	// Cycle a few times a second
 	//
 
-	int timesincelastcycle = (int) ( EclGetAccurateTime () - lastcycle );
-
+	const int now = static_cast<int> (EclGetAccurateTime ());
+	const int timesincelastcycle = now - lastcycle;
+	const int speed = game->GameSpeed ();
+	if ( speed <= GAMESPEED_PAUSED ) {
+		lastcycle = now;
+		return;
+	}
 	if ( timesincelastcycle >= 1000 / numcyclespersecond ) {
-
-		int cpuspeed = game->GetWorld ()->GetPlayer ()->gateway.GetCPUSpeed ();
-		cpuspeed /= numcyclespersecond;
-		
-		SvbCycle ( cpuspeed );
-
-		lastcycle = (int) EclGetAccurateTime ();
-
+		// GOLD HD_App::Update 004AE820: normal=1, fast=40, mega=60.
+		// The recovered factor is 20*speed above normal, not speed alone.
+		const int multiplier = speed > GAMESPEED_NORMAL ? 20 * speed : speed;
+		const int cpuspeed = game->GetWorld ()->GetPlayer ()->gateway.GetCPUSpeed ();
+		SvbCycle (multiplier * cpuspeed / numcyclespersecond);
+		lastcycle = now;
 	}
 	
 	//

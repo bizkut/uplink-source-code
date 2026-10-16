@@ -593,7 +593,7 @@ void EclDrawAllButtons ()
 	for ( int i = buttons.Size () - 1; i >= 0; --i )
 		if ( buttons.ValidIndex ( i ) ) {
 			Button *b = buttons [i];
-			if ( b->x >= 0 && b->y >= 0 ) {
+			if ( b->visible && b->x >= 0 && b->y >= 0 ) {
 				EclDrawButton ( i );
 				b->dirty = false;
 			}
@@ -639,6 +639,27 @@ void EclDirtyClear  ()
 
 }
 
+void EclSetButtonsVisibleByPrefix ( const char *prefix, bool visible )
+{
+	if ( !prefix || !prefix[0] ) return;
+	const size_t length = strlen (prefix);
+	for ( int i = 0; i < buttons.Size (); ++i ) {
+		if ( !buttons.ValidIndex (i) ) continue;
+		Button *button = buttons [i];
+		if ( button && button->name &&
+			 strncmp (button->name, prefix, length) == 0 ) {
+			button->visible = visible;
+			button->dirty = true;
+		}
+	}
+	if ( !visible && currenthighlight &&
+		 strncmp (currenthighlight, prefix, length) == 0 )
+		EclUnHighlightButton ();
+	if ( !visible && currentclick &&
+		 strncmp (currentclick, prefix, length) == 0 )
+		EclUnClickButton ();
+}
+
 void EclDrawButton ( char *name )
 {
 
@@ -652,7 +673,7 @@ void EclDrawButton ( char *name )
 void EclDrawButton ( int index )
 {
 
-	if ( buttons.ValidIndex ( index ) )
+	if ( buttons.ValidIndex ( index ) && buttons [index]->visible )
 		if ( EclIsClicked ( buttons [index]->name ) )
 			buttons [index]->Draw ( false, true );
 		else if ( EclIsHighlighted ( buttons [index]->name ) )
@@ -869,8 +890,9 @@ char *EclGetButtonAtCoord ( int x, int y )
 	for ( int i = 0; i < buttons.Size (); ++i ) {
 		if ( buttons.ValidIndex (i) ) {
 			Button *b = buttons [i];
-			if ( x >= b->x && x <= b->x + b->width &&
-				 y >= b->y && y <= b->y + b->height )				 
+			if ( b->visible &&
+				 x >= b->x && x <= b->x + b->width &&
+				 y >= b->y && y <= b->y + b->height )
 				return b->name;
 		}
 	}

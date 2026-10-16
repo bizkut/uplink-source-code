@@ -46,6 +46,11 @@ public:
 	FirewallDisable ();
 	~FirewallDisable ();
 
+	int GetStatus () const { return progress; }
+	int GetProgress () const { return progress ? ticksdone : 0; }
+	int GetTicksRequired () const { return progress ? ticksrequired : 0; }
+	const char *GetTargetIP () const { return progress ? ip : ""; }
+
 	void SetTarget ( UplinkObject *uo, char *uos, int uoi );
 	void MoveTo ( int x, int y, int time_ms );			
 

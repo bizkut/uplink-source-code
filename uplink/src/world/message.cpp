@@ -32,6 +32,7 @@ Message::Message()
 	SetBody ( " " );
 
 	data = NULL;
+	read = false;
 
 }
  
@@ -111,10 +112,9 @@ void Message::GiveCode ( char *ip, char *code )
 void Message::AttachData ( Data *newdata )
 {
 
-	if ( data )
-		delete data;
-	// Copy newdata
-	data = new Data ( newdata );	
+	Data *copy = newdata ? new Data ( newdata ) : NULL;
+	delete data;
+	data = copy;
 
 }
 
@@ -140,6 +140,20 @@ char *Message::GetBody ()
 	return body;
 
 }
+void Message::SetRead ( bool newread )
+{
+
+	read = newread;
+
+}
+
+bool Message::IsRead () const
+{
+
+	return read;
+
+}
+
 
 void Message::Send ()
 {
@@ -172,6 +186,14 @@ bool Message::Load ( FILE *file )
 
 	LoadID ( file );
 
+	read = false;
+	delete data;
+	data = NULL;
+	DeleteLListData ( &links );
+	links.Empty ();
+	DeleteBTreeData ( &codes );
+	codes.Empty ();
+
 	if ( !LoadDynamicStringStatic ( to, SIZE_PERSON_NAME, file ) ) return false;
 	if ( !LoadDynamicStringStatic ( from, SIZE_PERSON_NAME, file ) ) return false;
 
@@ -190,6 +212,22 @@ bool Message::Load ( FILE *file )
 
 	if ( !LoadLList ( &links, file ) ) return false;
 	if ( !LoadBTree ( &codes, file ) ) return false;
+
+	if ( strcmp ( game->GetLoadedSavefileVer (), "SAV64" ) >= 0 )
+		if ( !FileReadData ( &read, 1, 1, file ) ) return false;
+
+	if ( strcmp ( game->GetLoadedSavefileVer (), "SAV66" ) >= 0 ) {
+		bool hasattachment = false;
+		if ( !FileReadData ( &hasattachment, 1, 1, file ) ) return false;
+		if ( hasattachment ) {
+			Data *attachment = new Data ();
+			if ( !attachment->Load ( file ) ) {
+				delete attachment;
+				return false;
+			}
+			data = attachment;
+		}
+	}
 
 	LoadID_END ( file );
 
@@ -212,6 +250,11 @@ void Message::Save ( FILE *file )
 
 	SaveLList ( &links, file );
 	SaveBTree ( &codes, file );
+
+	fwrite ( &read, 1, 1, file );
+	bool hasattachment = ( data != NULL );
+	fwrite ( &hasattachment, 1, 1, file );
+	if ( hasattachment ) data->Save ( file );
 
 	SaveID_END ( file );
 

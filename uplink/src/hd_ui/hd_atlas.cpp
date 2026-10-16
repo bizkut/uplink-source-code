@@ -1,171 +1,98 @@
-/*
- * HD_UI Texture Atlas Implementation
- */
-
 #include "hd_atlas.h"
+#include "hd_allegro5.h"
+#include "hd_layout_parser.h"
 #include <tinyxml2.h>
-#include <cstdio>
-#include <vector>
-#include <memory>
+#include <cstring>
+#include <fstream>
+#include <iterator>
 
 namespace HDUI {
-
-// ============================================================================
-// TextureAtlas
-// ============================================================================
-
-TextureAtlas::TextureAtlas()
-    : atlasImage(nullptr)
-{
-}
-
-TextureAtlas::~TextureAtlas() {
-    // Destroy sub-bitmaps first
-    for (auto& pair : subTextures) {
-        if (pair.second.subBitmap) {
-            al_destroy_bitmap(pair.second.subBitmap);
-        }
-    }
-    subTextures.clear();
-    
-    // Then destroy parent atlas
-    if (atlasImage) {
-        al_destroy_bitmap(atlasImage);
-        atlasImage = nullptr;
-    }
-}
-
+TextureAtlas::TextureAtlas() {}
+TextureAtlas::~TextureAtlas() {}
 bool TextureAtlas::Load(const std::string& xmlPath) {
-    tinyxml2::XMLDocument doc;
-    
-    if (doc.LoadFile(xmlPath.c_str()) != tinyxml2::XML_SUCCESS) {
-        fprintf(stderr, "HD_UI: Failed to load atlas XML: %s\n", xmlPath.c_str());
-        return false;
-    }
-    
-    tinyxml2::XMLElement* root = doc.FirstChildElement("TextureAtlas");
-    if (!root) {
-        fprintf(stderr, "HD_UI: No <TextureAtlas> root in: %s\n", xmlPath.c_str());
-        return false;
-    }
-    
-    // Get image path (relative to XML file)
-    const char* imgPath = root->Attribute("imagePath");
-    if (!imgPath) {
-        fprintf(stderr, "HD_UI: No imagePath attribute in atlas: %s\n", xmlPath.c_str());
-        return false;
-    }
-    
-    // Build full path (same directory as XML)
-    std::string baseDir = xmlPath;
-    size_t lastSlash = baseDir.find_last_of("/\\");
-    if (lastSlash != std::string::npos) {
-        baseDir = baseDir.substr(0, lastSlash + 1);
-    } else {
-        baseDir = "";
-    }
-    
-    imagePath = baseDir + imgPath;
-    
-    // Load the atlas image
-    atlasImage = al_load_bitmap(imagePath.c_str());
-    if (!atlasImage) {
-        fprintf(stderr, "HD_UI: Failed to load atlas image: %s\n", imagePath.c_str());
-        return false;
-    }
-    
-    printf("HD_UI: Loaded atlas image: %s (%dx%d)\n", 
-           imagePath.c_str(), 
-           al_get_bitmap_width(atlasImage),
-           al_get_bitmap_height(atlasImage));
-    
-    // Parse all SubTexture elements
-    int count = 0;
-    for (tinyxml2::XMLElement* elem = root->FirstChildElement("SubTexture");
-         elem != nullptr;
-         elem = elem->NextSiblingElement("SubTexture"))
-    {
+    std::ifstream file(xmlPath.c_str(),std::ios::binary);
+    if (!file) return false;
+    const std::string bytes((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
+    if (file.bad()) return false;
+    const std::string xml=LayoutParser::SanitizeXML(bytes);
+    tinyxml2::XMLDocument document;
+    if (document.Parse(xml.data(),xml.size())!=tinyxml2::XML_SUCCESS) return false;
+    tinyxml2::XMLElement* root=document.FirstChildElement("TextureAtlas");
+    if (!root || root!=document.FirstChildElement() || root->NextSiblingElement()) return false;
+    const char* path=root->Attribute("imagePath");
+    if (!path || !*path) return false;
+    const size_t slash=xmlPath.find_last_of("/\\");
+    const std::string directory=slash==std::string::npos ? "" : xmlPath.substr(0,slash+1);
+    const std::string candidatePath=path[0]=='/' ? path : directory+path;
+    ALLEGRO_BITMAP* loaded=Allegro5System::LoadBitmap(candidatePath.c_str());
+    if (!loaded) return false;
+    std::shared_ptr<ALLEGRO_BITMAP> image(loaded,al_destroy_bitmap);
+    const int imageWidth=al_get_bitmap_width(image.get()),imageHeight=al_get_bitmap_height(image.get());
+    std::map<std::string,SubTexture> definitions;
+    for (tinyxml2::XMLElement* element=root->FirstChildElement();element;element=element->NextSiblingElement()) {
+        if (std::strcmp(element->Name(),"SubTexture")) return false;
+        const char* name=element->Attribute("name");
+        if (!name || !*name || definitions.find(name)!=definitions.end()) return false;
         SubTexture sub;
-        const char* name = elem->Attribute("name");
-        if (!name) continue;
-        
-        sub.name = name;
-        elem->QueryIntAttribute("x", &sub.x);
-        elem->QueryIntAttribute("y", &sub.y);
-        elem->QueryIntAttribute("width", &sub.width);
-        elem->QueryIntAttribute("height", &sub.height);
-        
-        // Create sub-bitmap for this region
-        sub.subBitmap = al_create_sub_bitmap(atlasImage, 
-                                              sub.x, sub.y, 
-                                              sub.width, sub.height);
-        
-        subTextures[sub.name] = sub;
-        count++;
+        sub.name=name;
+        if (element->QueryIntAttribute("x",&sub.x)!=tinyxml2::XML_SUCCESS ||
+            element->QueryIntAttribute("y",&sub.y)!=tinyxml2::XML_SUCCESS ||
+            element->QueryIntAttribute("width",&sub.width)!=tinyxml2::XML_SUCCESS ||
+            element->QueryIntAttribute("height",&sub.height)!=tinyxml2::XML_SUCCESS) return false;
+        if (sub.x<0 || sub.y<0 || sub.width<=0 || sub.height<=0 ||
+            sub.x>imageWidth || sub.y>imageHeight || sub.width>imageWidth-sub.x || sub.height>imageHeight-sub.y) return false;
+        ALLEGRO_BITMAP* bitmap=al_create_sub_bitmap(image.get(),sub.x,sub.y,sub.width,sub.height);
+        if (!bitmap) return false;
+        sub.texture=std::shared_ptr<ALLEGRO_BITMAP>(bitmap,[image](ALLEGRO_BITMAP* texture) { al_destroy_bitmap(texture); });
+        sub.subBitmap=bitmap;
+        definitions.emplace(sub.name,std::move(sub));
     }
-    
-    printf("HD_UI: Loaded %d sub-textures from atlas\n", count);
+    // Commit only a complete atlas. Existing image users retain their handles.
+    subTextures.swap(definitions);
+    atlasImage.swap(image);
+    imagePath=candidatePath;
     return true;
 }
-
+std::shared_ptr<ALLEGRO_BITMAP> TextureAtlas::AcquireTexture(const std::string& name) const {
+    const auto found=subTextures.find(name);
+    return found==subTextures.end() ? std::shared_ptr<ALLEGRO_BITMAP>() : found->second.texture;
+}
 ALLEGRO_BITMAP* TextureAtlas::GetTexture(const std::string& name) {
-    auto it = subTextures.find(name);
-    if (it != subTextures.end()) {
-        return it->second.subBitmap;
-    }
-    return nullptr;
+    const auto found=subTextures.find(name);
+    return found==subTextures.end() ? nullptr : found->second.subBitmap;
 }
-
-bool TextureAtlas::HasTexture(const std::string& name) const {
-    return subTextures.find(name) != subTextures.end();
-}
-
-// ============================================================================
-// AtlasManager
-// ============================================================================
-
-AtlasManager& AtlasManager::GetInstance() {
-    static AtlasManager instance;
-    return instance;
-}
-
-AtlasManager::AtlasManager() {
-}
-
-AtlasManager::~AtlasManager() {
-    ClearAll();
-}
-
+bool TextureAtlas::HasTexture(const std::string& name) const { return subTextures.find(name)!=subTextures.end(); }
+AtlasManager& AtlasManager::GetInstance() { static AtlasManager manager; return manager; }
+AtlasManager::AtlasManager() {}
+AtlasManager::~AtlasManager() { ClearAll(); }
 void AtlasManager::SetBasePath(const std::string& path) {
-    basePath = path;
-    if (!basePath.empty() && basePath.back() != '/') {
-        basePath += '/';
-    }
+    std::string normalized=path;
+    if (!normalized.empty() && normalized.back()!='/' && normalized.back()!='\\') normalized+='/';
+    if (basePath!=normalized) { ClearAll(); basePath=normalized; }
 }
-
 bool AtlasManager::LoadAtlas(const std::string& name) {
-    std::string fullPath = basePath + name;
-    
-    auto atlas = std::unique_ptr<TextureAtlas>(new TextureAtlas());
-    if (!atlas->Load(fullPath)) {
-        return false;
-    }
-    
-    atlases.push_back(std::move(atlas));
+    const std::string path=!name.empty() && name[0]=='/' ? name : basePath+name;
+    if (atlases.find(path)!=atlases.end()) return true;
+    std::unique_ptr<TextureAtlas> atlas(new TextureAtlas());
+    if (!atlas->Load(path)) return false;
+    atlases.emplace(path,std::move(atlas));
     return true;
 }
-
-ALLEGRO_BITMAP* AtlasManager::GetTexture(const std::string& name) {
-    // Search all loaded atlases
-    for (auto& atlas : atlases) {
-        ALLEGRO_BITMAP* tex = atlas->GetTexture(name);
-        if (tex) return tex;
+std::shared_ptr<ALLEGRO_BITMAP> AtlasManager::AcquireTexture(const std::string& name) const {
+    const auto cached=textures.find(name);
+    if (cached!=textures.end()) return cached->second;
+    for (const auto& atlas : atlases) {
+        std::shared_ptr<ALLEGRO_BITMAP> texture=atlas.second->AcquireTexture(name);
+        if (texture) return texture;
     }
-    return nullptr;
+    return std::shared_ptr<ALLEGRO_BITMAP>();
 }
-
-void AtlasManager::ClearAll() {
-    atlases.clear();
+ALLEGRO_BITMAP* AtlasManager::GetTexture(const std::string& name) {
+    const auto cached=textures.find(name);
+    if (cached!=textures.end()) return cached->second.get();
+    std::shared_ptr<ALLEGRO_BITMAP> texture=AcquireTexture(name);
+    if (!texture) return nullptr;
+    ALLEGRO_BITMAP* bitmap=texture.get(); textures.emplace(name,std::move(texture)); return bitmap;
 }
-
+void AtlasManager::ClearAll() { textures.clear(); atlases.clear(); }
 } // namespace HDUI

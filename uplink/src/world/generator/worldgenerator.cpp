@@ -3681,9 +3681,9 @@ Computer *WorldGenerator::GenerateVoicePhoneSystem ( char *personname )
 Person *WorldGenerator::GeneratePerson ()
 {
 
-	//char *name = strdup( NameGenerator::GeneratePersonName () );
+	bool female = NumberGenerator::RandomNumber ( 100 ) <= 50;
 	char name[MAX_PERSONNAME];
-	strncpy( name, NameGenerator::GeneratePersonName(),
+	strncpy( name, NameGenerator::GeneratePersonName ( female ),
 		     MAX_PERSONNAME );
 	if ( name[MAX_PERSONNAME - 1] != '\0' ) {
 		name[MAX_PERSONNAME - 1] = '\0';
@@ -3705,6 +3705,7 @@ Person *WorldGenerator::GeneratePerson ()
 
 	Person *person = new Person ();
 	person->SetName ( name );
+	person->SetGender ( female );
 	person->SetAge ( age );
 	person->SetPhotoIndex ( photo );
     person->SetVoiceIndex ( voice );
@@ -3732,7 +3733,7 @@ Agent *WorldGenerator::GenerateAgent ()
 	char name [SIZE_PERSON_NAME];
 	char handle [SIZE_AGENT_HANDLE];
 
-    UplinkStrncpy ( name, NameGenerator::GeneratePersonName (), sizeof ( name ) );
+    UplinkStrncpy ( name, NameGenerator::GeneratePersonName ( false ), sizeof ( name ) );
     UplinkStrncpy ( handle, NameGenerator::GenerateAgentAlias (), sizeof ( handle ) );
 
 	Computer *comp = GeneratePersonalComputer ( name );

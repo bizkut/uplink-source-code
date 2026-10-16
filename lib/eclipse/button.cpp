@@ -24,6 +24,7 @@ Button::Button ()
 	mouseup = mousedown = mousemove = NULL;
 	SetTooltip ( " " );
 	userinfo = 0;
+	visible = true;
 
 }
 
@@ -38,6 +39,7 @@ Button::Button ( int newx, int newy, int newwidth, int newheight,
 	mouseup = mousedown = mousemove = NULL;
 	SetTooltip ( " " );
 	userinfo = 0;
+	visible = true;
 
 }
 

@@ -25,8 +25,8 @@
 #error "One of FULLGAME DEMOGAME or TESTGAME must be defined"
 #endif
 
-#define     VERSION_NUMBER_INT      "10.0"                       // Only the 2 first digit after the . are effective
-#define     VERSION_NAME_INT        "RELEASE"
+#define     VERSION_NUMBER_INT      "1.04"                       // Only the 2 first digit after the . are effective
+#define     VERSION_NAME_INT        "GOLD"
 
 #if defined(DEMOGAME)
 #define     VERSION_NUMBER          VERSION_NUMBER_INT "DEMO"
@@ -36,7 +36,7 @@
 #define     VERSION_NAME            VERSION_NAME_INT
 #endif
 
-#define     SAVEFILE_VERSION        "SAV62"                     // Max version is SAVZZ (due to the number of characters to read)
+#define     SAVEFILE_VERSION        "SAV67"                     // Max version is SAVZZ (due to the number of characters to read)
 #define     SAVEFILE_VERSION_MIN    "SAV56"                     // Minimun Savefile version to run Uplink
 
 // SAVEFILE_VERSION 56 is 1.31 vanilla
@@ -50,6 +50,11 @@
 // SAVEFILE_VERSION 60 save world map server coloring in vlocation, also savegames are now saved in redshirt2
 // SAVEFILE_VERSION 61 removed type from gateway
 // SAVEFILE_VERSION 62 save the world map the game is using
+// SAVEFILE_VERSION 63 compatibility bump; no serialized layout change observed in GOLD
+// SAVEFILE_VERSION 64 save message and mission read flags
+// SAVEFILE_VERSION 65 save person gender
+// SAVEFILE_VERSION 66 save message attachments
+// SAVEFILE_VERSION 67 save mission target labels
 
 // Build options (define in Preprocessor directives) 
 //#define		USE_SDL											// Use SDL instead of glut

@@ -69,6 +69,14 @@ public:
 
 	VoiceAnalyser ();
 	~VoiceAnalyser ();
+
+	int GetStatus () const { return STATUS; }
+	const char *GetPersonName () const { return personname; }
+	const char *GetPersonIP () const { return personip; }
+	int GetProgress () const { return progress; }
+	int GetTicksRequired () const { return numticksrequired; }
+	int GetSample ( int index ) const { return index >= 0 && index < VOICEANALYSER_NUMSAMPLES ? sample[index] : 0; }
+	void BeginLoad ();
 	
 
 	void Initialise ();     

@@ -71,7 +71,7 @@ STRIP = strip
 
 NM = nm
 
-CXXFLAGS += $(INCLUDES) -w -D_REENTRANT 
+CXXFLAGS += $(INCLUDES) -w -D_REENTRANT -DUSE_ALLEGRO5
 
 # To produce the source list, use:
 # find . -name '*.cpp' | sed 's%^\./\(.*\)%\1 \\%'
@@ -91,6 +91,19 @@ hd_ui/hd_allegro5.cpp \
 hd_ui/hd_ui_object.cpp \
 hd_ui/hd_layout_parser.cpp \
 hd_ui/hd_screens.cpp \
+hd_ui/hd_intro.cpp \
+hd_ui/hd_hotkeys.cpp \
+hd_ui/hd_mm_options.cpp \
+hd_ui/hd_notes.cpp \
+hd_ui/hd_taskmanager_v2.cpp \
+hd_ui/hd_legacy_bridge.cpp \
+hd_ui/hd_local_windows.cpp \
+hd_ui/hd_remote_core.cpp \
+hd_ui/hd_remote_data.cpp \
+hd_ui/hd_remote_services.cpp \
+hd_ui/hd_app_windows.cpp \
+hd_ui/hd_map_lan.cpp \
+hd_ui/hd_end_screens.cpp \
 hd_ui/hd_atlas.cpp \
 game/data/data.cpp \
 game/game.cpp \

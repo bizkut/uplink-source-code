@@ -57,6 +57,18 @@ int FileCopier::GetState ()
 
 }
 
+int FileCopier::GetSourceSize () const
+{
+	Data *data = source ? source->GetData (sourceindex) : NULL;
+	return data ? data->size : 0;
+}
+
+const char *FileCopier::GetSourceTitle () const
+{
+	Data *data = source ? source->GetData (sourceindex) : NULL;
+	return data ? data->title : "";
+}
+
 void FileCopier::MoveTo ( int x, int y, int time_ms )
 {
 
@@ -136,18 +148,16 @@ void FileCopier::SetTarget ( UplinkObject *uo, char *uos, int uoi )
             return;
         }
 
+		// Read-only accounts cannot upload files to a remote file server.
+		if ( uo->GetOBJECTID () == OID_DATABANK && strstr ( uos, "fileserverscreen" ) &&
+			 game->GetInterface ()->GetRemoteInterface ()->security_level > 2 ) {
+			create_msgbox ( "Error", "Access Denied\nInsufficient Security Level" );
+			return;
+		}
+
 		Data *datacopy = new Data ( data );
 
 		if ( uo->GetOBJECTID () == OID_DATABANK ) {
-
-            // [UPLINKOS MOD FIX] ReadOnly accounts cannot upload files
-            if ( strstr ( uos, "fileserverscreen" ) ) {
-                 if ( game->GetInterface ()->GetRemoteInterface ()->security_level > 2 ) {
-                      create_msgbox ( "Error", "Access Denied\nInsufficient Security Level" );
-                      delete datacopy;
-                      return;
-                 }
-            }
 
 			// Copying the file into a memory bank
 			// Target memory area selected
@@ -174,6 +184,7 @@ void FileCopier::SetTarget ( UplinkObject *uo, char *uos, int uoi )
 			UplinkAssert ( m );
 
 			m->AttachData ( datacopy );
+			delete datacopy;
 	
 			downloading = FILECOPIER_FINISHED;
 

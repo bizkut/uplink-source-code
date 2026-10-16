@@ -26,6 +26,7 @@ public:
 	int userinfo;								// Used to represent other program data about the button.
 
 	bool dirty;
+	bool visible;
 
 	Image *image_standard;					// Used when this button is 
 	Image *image_highlighted;					// represented by an image

@@ -45,6 +45,8 @@ public:
 	GatewayNuke ();
 	~GatewayNuke ();
 
+	int GetStatus () const { return status; }
+
 	void SetTarget ( UplinkObject *uo, char *uos, int uoi );
 	void MoveTo ( int x, int y, int time_ms );				
 

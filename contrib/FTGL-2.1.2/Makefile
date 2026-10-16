@@ -1,6 +1,8 @@
 # FTGL-2.1.2 Makefile for Uplink
 # Builds bundled FTGL library with system FreeType2
 
+.DEFAULT_GOAL := all
+
 include ../../standard.mk
 
 FTGL_SRC = src

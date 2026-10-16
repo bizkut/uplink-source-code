@@ -44,6 +44,7 @@ Game::Game ()
 
 	gamespeed = GAMESPEED_PAUSED;
 	gob = NULL;
+	lastsave = time ( NULL );
 
 	loadedSavefileVer = NULL;
 
@@ -143,6 +144,16 @@ void Game::NewGame ()
 		if ( NumberGenerator::RandomNumber (5) == 0 ) 	WorldGenerator::GenerateSimpleStartingMissionB ();
 
 	} while ( GetWorld ()->date.Before ( &gamestart ) );
+
+	// Events schedule their successors from their own due dates. During
+	// world generation the clock advances by days, so a single scheduler
+	// update can leave several recurring events behind the playable start
+	// date. Drain that backlog before handing control to the player.
+	Date *nextEvent;
+	do {
+		GetWorld ()->scheduler.Update ();
+		nextEvent = GetWorld ()->scheduler.GetDateOfNextEvent ();
+	} while ( nextEvent && nextEvent->Before ( &gamestart ) );
 
 }
 

@@ -50,6 +50,10 @@ public:
 	Tutorial ();
 	~Tutorial ();
 
+	int GetCurrentTutorial () const { return current_tutorial; }
+	int GetCurrentPart () const { return current_part; }
+	bool IsNextVisible () const { return nextvisible; }
+
 	void RunMenu ();
 	void RunTutorial ( int tutorial, int part );
     void RunTutorial1 ( int part );

@@ -47,6 +47,7 @@ DictionaryHacker::DictionaryHacker () : UplinkTask ()
 
 	numticksrequired = 0;
 	progress = 0;
+	completed = failed = false;
 
 	targetstring = NULL;
 
@@ -95,6 +96,7 @@ void DictionaryHacker::Tick ( int n )
 
 				// Test to see if we have checked all possible words
 				if ( currentindex >= game->GetWorld ()->passwords.Size () ) {
+					failed = true;
 
 					// Terminate this task
 					SvbRemoveTask ( this );			
@@ -135,6 +137,8 @@ void DictionaryHacker::Tick ( int n )
                                 else			Computer::GenerateAccessCode( password, newcode, sizeof ( newcode ) );
 
 								game->GetWorld ()->GetPlayer ()->GiveCode ( game->GetWorld ()->GetPlayer ()->remotehost, newcode );
+
+								completed = true;
 
 								SvbRemoveTask ( this );
 

@@ -1,0 +1,16 @@
+# Native build outputs
+*.o
+*.a
+
+/uplink/src/.linux-objs/
+/uplink/src/uplink.full
+/uplink/src/version.full
+/uplink/src/uplink.demo
+/uplink/src/version.demo
+/uplink/bin/uplink
+/uplink/bin/temp/
+/uplink/src/temp/
+
+# Release packaging outputs
+/dist/
+/.release-assets/

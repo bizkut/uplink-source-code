@@ -40,6 +40,66 @@ static ALLEGRO_DISPLAY *display = NULL;
 static ALLEGRO_EVENT_QUEUE *eventQueue = NULL;
 static ALLEGRO_TIMER *timer = NULL;
 
+static bool finished = false;
+static GciInputObserverT *inputObserver = NULL;
+static void *inputObserverContext = NULL;
+
+bool GciRegisterInputObserver(GciInputObserverT *observer, void *context)
+{
+  if (!observer || (inputObserver &&
+      (inputObserver != observer || inputObserverContext != context)))
+    return false;
+  inputObserverContext = context;
+  inputObserver = observer;
+  return true;
+}
+
+void GciUnregisterInputObserver(GciInputObserverT *observer, void *context)
+{
+  if (inputObserver == observer && inputObserverContext == context) {
+    inputObserver = NULL;
+    inputObserverContext = NULL;
+  }
+}
+
+static bool GciIsInputEvent(unsigned type)
+{
+  switch (type) {
+  case ALLEGRO_EVENT_KEY_DOWN:
+  case ALLEGRO_EVENT_KEY_UP:
+  case ALLEGRO_EVENT_KEY_CHAR:
+  case ALLEGRO_EVENT_MOUSE_AXES:
+  case ALLEGRO_EVENT_MOUSE_WARPED:
+  case ALLEGRO_EVENT_MOUSE_ENTER_DISPLAY:
+  case ALLEGRO_EVENT_MOUSE_LEAVE_DISPLAY:
+  case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+  case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+  case ALLEGRO_EVENT_DISPLAY_SWITCH_OUT: // Input focus/capture cancellation.
+    return true;
+  default:
+    return false;
+  }
+}
+
+static void GciDestroyGraphicsResources()
+{
+  inputObserver = NULL;
+  inputObserverContext = NULL;
+  if (timer)
+    al_stop_timer(timer);
+  if (eventQueue) {
+    al_destroy_event_queue(eventQueue);
+    eventQueue = NULL;
+  }
+  if (timer) {
+    al_destroy_timer(timer);
+    timer = NULL;
+  }
+  if (display) {
+    al_destroy_display(display);
+    display = NULL;
+  }
+}
 static unsigned _GciGetAccurateTime();
 
 static bool _GciIsInitGraphicsLibrary = false;
@@ -86,28 +146,11 @@ char *GciInitGraphicsLibrary(int graphics_flags,
 
   if (debugging) printf("Initialising Allegro5...");
 
-  // Initialize Allegro5 (skip if already done by 1-arg version)
-  static bool allegro_core_init = false;
-  if (!allegro_core_init) {
-    if (!al_init()) {
-      return strdup("Could not initialize Allegro5");
-    }
-
-    // Initialize addons
-    al_init_primitives_addon();
-    al_init_font_addon();
-    al_init_ttf_addon();
-    al_init_image_addon();
-  
-    if (!al_install_keyboard()) {
-      return strdup("Could not install Allegro5 keyboard");
-    }
-  
-    if (!al_install_mouse()) {
-      return strdup("Could not install Allegro5 mouse");
-    }
-    allegro_core_init = true;
-  }
+  char *error = GciInitGraphicsLibrary(graphics_flags);
+  if (error)
+    return error;
+  if (display)
+    return strdup("Allegro5 display is already initialized");
 
   if (debugging) printf("done\n");
 
@@ -148,15 +191,14 @@ char *GciInitGraphicsLibrary(int graphics_flags,
   // Create event queue
   eventQueue = al_create_event_queue();
   if (!eventQueue) {
-    al_destroy_display(display);
+    GciDestroyGraphicsResources();
     return strdup("Could not create Allegro5 event queue");
   }
 
   // Create timer (60 FPS)
   timer = al_create_timer(1.0 / 60.0);
   if (!timer) {
-    al_destroy_event_queue(eventQueue);
-    al_destroy_display(display);
+    GciDestroyGraphicsResources();
     return strdup("Could not create Allegro5 timer");
   }
 
@@ -204,7 +246,6 @@ GUCCI_FUNC(Special);
 
 static bool gciRedisplay = true;
 static bool displayDamaged = false;
-static bool finished = false;
 
 bool GciLayerDamaged()
 {
@@ -248,7 +289,7 @@ static TimerList timerEvents;
 
 static void GciProcessTimerEvents()
 {
-  for (TimerList::iterator i = timerEvents.begin(); i != timerEvents.end(); ) {
+  for (TimerList::iterator i = timerEvents.begin(); i != timerEvents.end() && !finished; ) {
     Callback *c = *i;
     if (c->expired()) {
       i = timerEvents.erase(i);
@@ -273,6 +314,9 @@ void GciTimerFunc(unsigned int millis, GciCallbackT *callback, int value)
 // Main event loop
 void GciMainLoop()
 {
+  if (!display || !eventQueue)
+    return;
+
   finished = false;
 
   while (!finished) {
@@ -283,24 +327,25 @@ void GciMainLoop()
 
     ALLEGRO_EVENT event;
 
-    while (al_get_next_event(eventQueue, &event) && !finished) {
+    while (!finished && al_get_next_event(eventQueue, &event)) {
+      if (GciIsInputEvent(event.type) && inputObserver &&
+          inputObserver(event, inputObserverContext))
+        continue;
       switch (event.type) {
       case ALLEGRO_EVENT_KEY_DOWN:
       case ALLEGRO_EVENT_KEY_CHAR: {
         int gciKey = allegroKeyToGucci(event.keyboard.keycode);
+        ALLEGRO_MOUSE_STATE state;
+        al_get_mouse_state(&state);
         
         if (event.type == ALLEGRO_EVENT_KEY_CHAR && event.keyboard.unichar > 0) {
           // Regular character
           if (gciKeyboardHandlerP)
-            (*gciKeyboardHandlerP)(event.keyboard.unichar, 
-                                   al_get_mouse_state_axis(NULL, 0),
-                                   al_get_mouse_state_axis(NULL, 1));
+            (*gciKeyboardHandlerP)(event.keyboard.unichar, state.x, state.y);
         } else {
           // Special key
           if (gciSpecialHandlerP)
-            (*gciSpecialHandlerP)(gciKey,
-                                  al_get_mouse_state_axis(NULL, 0),
-                                  al_get_mouse_state_axis(NULL, 1));
+            (*gciSpecialHandlerP)(gciKey, state.x, state.y);
         }
         break;
       }
@@ -353,11 +398,14 @@ void GciMainLoop()
       }
     }
 
+    if (finished)
+      break;
+
     // Process timer events
     GciProcessTimerEvents();
 
     // Idle callback
-    if (gciIdleHandlerP)
+    if (!finished && gciIdleHandlerP)
       (*gciIdleHandlerP)();
   }
 }
@@ -389,7 +437,7 @@ int GciGetWindowHeight()
 
 void GciRestoreScreenSize()
 {
-  // Not needed with Allegro5 windowed mode
+  finished = true;
 }
 
 bool GciIsInitGraphicsLibrary()
@@ -399,41 +447,17 @@ bool GciIsInitGraphicsLibrary()
 
 void GciDeleteGraphicsLibrary()
 {
-  if (timer) {
-    al_destroy_timer(timer);
-    timer = NULL;
-  }
-  if (eventQueue) {
-    al_destroy_event_queue(eventQueue);
-    eventQueue = NULL;
-  }
-  if (display) {
-    al_destroy_display(display);
-    display = NULL;
-  }
-  
+  finished = true;
+  for (TimerList::iterator i = timerEvents.begin(); i != timerEvents.end(); ++i)
+    delete *i;
+  timerEvents.clear();
+  GciDestroyGraphicsResources();
   _GciIsInitGraphicsLibrary = false;
 }
 
-#endif // USE_ALLEGRO5
 
 // Additional required functions
 
-char *GciInitGraphicsLibrary_simple(int graphics_flags)
-{
-  bool debugging = (graphics_flags & GCI_DEBUGSTART) != 0;
-
-  if (debugging) printf("Initialising Allegro5...");
-
-  if (!al_init()) {
-    return strdup("Could not initialize Allegro5");
-  }
-
-  if (debugging) printf("done\n ");
-
-  _GciIsInitGraphicsLibrary = true;
-  return NULL;
-}
 
 char *GciInitGraphics(const char *caption, int graphics_flags, int screenWidth, int screenHeight,
                       int screenDepth, int screenRefresh, int argc, char *argv[])
@@ -513,11 +537,14 @@ bool GciAppVisible()
 // Proper 1-arg version that sets up Allegro5 core
 char *GciInitGraphicsLibrary(int graphics_flags)
 {
+  if (_GciIsInitGraphicsLibrary)
+    return NULL;
+
   bool debugging = (graphics_flags & GCI_DEBUGSTART) != 0;
 
   if (debugging) printf("Initialising Allegro5...");
 
-  if (!al_init()) {
+  if (!al_is_system_installed() && !al_init()) {
     return strdup("Could not initialize Allegro5");
   }
 
@@ -540,3 +567,5 @@ char *GciInitGraphicsLibrary(int graphics_flags)
   _GciIsInitGraphicsLibrary = true;
   return NULL;
 }
+
+#endif // USE_ALLEGRO5

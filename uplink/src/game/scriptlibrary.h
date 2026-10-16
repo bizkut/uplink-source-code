@@ -42,6 +42,11 @@ public:
 	static void Script17 ();						// Search for Social Security
 
 	// ========    Start sequence =============================================
+	// Shared GOLD registration bootstrap; callers validate credentials first.
+	// The model copies credentials and owns the records, message and mission.
+	static void RegisterNewAgent ( char *name, char *password );
+	static void CompleteFirstRun ();
+
 
 	static void Script30 ();						// Opening caption
 	static void Script31 ();						// Connection anim

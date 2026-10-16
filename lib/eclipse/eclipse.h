@@ -80,6 +80,7 @@ void EclHighlightNextEditableButton ();
 void EclDirtyButton		  ( char *name );					// Tells eclipse that this needs re-drawing
 void EclDirtyRectangle	  ( int x, int y, int w, int h );	// Tells eclipse to blank this area
 void EclDirtyClear        ();								// Clears all dirty buttons / rectangles
+void EclSetButtonsVisibleByPrefix ( const char *prefix, bool visible );
 void EclClearRectangle    ( int x, int y, int w, int h );   // Tells eclipse to blank this area (now)
 
 bool EclIsOccupied        ( int x, int y, int w, int h );	// True if there is a button here

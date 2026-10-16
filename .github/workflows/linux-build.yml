@@ -1,0 +1,74 @@
+name: Linux build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Ubuntu 24.04 x86_64
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install build dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config autoconf automake libtool \
+            libx11-dev libxext-dev libgl1-mesa-dev libglu1-mesa-dev \
+            libsdl1.2-dev libsdl-mixer1.2-dev \
+            libfreetype-dev libtiff-dev libjpeg-dev zlib1g-dev \
+            liballegro5-dev liballegro-image5-dev liballegro-ttf5-dev \
+            libtinyxml2-dev
+
+      - name: Build bundled libraries
+        run: |
+          make -C contrib/FTGL-2.1.2 -j"$(nproc)"
+          make -C contrib/tcp4u.331/src -f ../Unix/Makefile -j"$(nproc)"
+          make -C contrib/irclib -j"$(nproc)"
+          make -C contrib/unrar -j"$(nproc)"
+          make -C lib -j"$(nproc)"
+
+      - name: Build UplinkOS GOLD
+        run: make -C uplink/src -f Makefile.linux -j"$(nproc)"
+
+      - name: Package Linux runtime
+        run: |
+          install -m 755 uplink/src/uplink.full uplink/bin/uplink
+          mkdir -p dist
+          tar --dereference \
+            --exclude='bin/temp' \
+            --exclude='bin/bak' \
+            --exclude='bin/*.dll' \
+            --exclude='bin/*.DLL' \
+            -C uplink -czf dist/uplinkos-gold-linux-x86_64.tar.gz bin
+          cp README.md BUILDING.linux dist/
+          cd dist
+          sha256sum uplinkos-gold-linux-x86_64.tar.gz \
+            > uplinkos-gold-linux-x86_64.tar.gz.sha256
+
+      - name: Upload Linux build
+        uses: actions/upload-artifact@v4
+        with:
+          name: uplinkos-gold-linux-x86_64
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14

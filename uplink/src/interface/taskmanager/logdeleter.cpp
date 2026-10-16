@@ -30,7 +30,7 @@
 #include "world/vlocation.h"
 #include "world/computer/computer.h"
 #include "world/computer/logbank.h"
-#include "world/computer/computerscreen/computerscreen.h"
+#include "world/computer/computerscreen/logscreen.h"
 #include "world/generator/worldgenerator.h"
 
 #include "mmgr.h"
@@ -122,6 +122,16 @@ void LogDeleter::SetTarget ( UplinkObject *uo, char *uos, int uoi )
 
 			}
 
+			// Account holders may edit their own logs; other logs require administrator access.
+			RemoteInterface *remote = game->GetInterface ()->GetRemoteInterface ();
+			ComputerScreen *screen = remote->GetComputerScreen ();
+			bool accountLogs = screen->GetOBJECTID () == OID_LOGSCREEN &&
+							   ((LogScreen *) screen)->TARGET == LOGSCREEN_TARGET_ACCOUNTLOGS;
+			if ( remote->security_level > 1 && !accountLogs ) {
+				create_msgbox ( "Error", "Access Denied\nInsufficient Security Level" );
+				return;
+			}
+
 			source = (LogBank *) uo;
 			sourceindex = uoi;
 
@@ -133,14 +143,8 @@ void LogDeleter::SetTarget ( UplinkObject *uo, char *uos, int uoi )
 
 			MoveTo ( button->x, button->y, 1000 );
 
-                        Computer *comp = game->GetInterface ()->GetRemoteInterface ()->GetComputerScreen ()->GetComputer ();
+                        Computer *comp = screen->GetComputer ();
                         UplinkAssert (comp);
-
-                        // [UPLINKOS MOD FIX] ReadOnly accounts cannot delete logs
-                        if ( game->GetInterface ()->GetRemoteInterface ()->security_level > 2 ) {
-                             create_msgbox ( "Error", "Access Denied\nInsufficient Security Level" );
-                             return;
-                        }
 
                         if ( comp->security.IsRunning_Monitor () )	 	
 				game->GetWorld ()->GetPlayer ()->GetConnection ()->BeginTrace ();

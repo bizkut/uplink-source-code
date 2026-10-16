@@ -356,6 +356,10 @@ void App::SaveGame ( char *username )
 	if ( strcmp ( username, "NEWAGENT" ) == 0 ) return;
 
 	UplinkAssert ( game );
+	const bool waspaused = game->GameSpeed () == GAMESPEED_PAUSED;
+	if ( waspaused )
+		game->SetGameSpeed ( GAMESPEED_NORMAL );
+
 
 	// Try to save to the local dir
 
@@ -402,6 +406,9 @@ void App::SaveGame ( char *username )
 	
 	}
 
+	if ( waspaused )
+		game->SetGameSpeed ( GAMESPEED_PAUSED );
+
 }
 
 void App::RetireGame ( char *username )
@@ -411,6 +418,11 @@ void App::RetireGame ( char *username )
 	UplinkSnprintf ( filenamereal, sizeof ( filenamereal ), "%s%s.usr", userpath, username );
 	char filenametmp [256];
 	UplinkSnprintf ( filenametmp, sizeof ( filenametmp ), "%s%s.tmp", userpath, username );
+
+	char hotkeysfilename [256];
+	UplinkSnprintf ( hotkeysfilename, sizeof ( hotkeysfilename ), "%s%s_hotkeys.xml", userpath, username );
+	char notesfilename [256];
+	UplinkSnprintf ( notesfilename, sizeof ( notesfilename ), "%s%s_notes.xml", userpath, username );
 
 	char filenameretirereal [256];
 	UplinkSnprintf ( filenameretirereal, sizeof ( filenameretirereal ), "%s%s.usr", userretirepath, username );
@@ -428,6 +440,8 @@ void App::RetireGame ( char *username )
 		printf ( "success\n" );
 		RemoveFile ( filenametmp );
 		RemoveFile ( filenamereal );
+		RemoveFile ( hotkeysfilename );
+		RemoveFile ( notesfilename );
 	}
 
 }

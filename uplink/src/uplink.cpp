@@ -75,6 +75,10 @@
 // HD UI Mode
 #include "hd_ui/hd_screens.h"
 
+#ifdef USE_ALLEGRO5
+void GciDeleteGraphicsLibrary();
+#endif
+
 // ============================================================================
 // Initialisation functions
 
@@ -404,9 +408,6 @@ void RunUplink ( int argc, char **argv )
 #endif
 		Init_Options  ( argc, argv );
 
-		printf ( "DEBUG: After Init_Options, before VerifyLegit check\n" );
-		fflush(stdout);
-		if (file_stdout) { fprintf(file_stdout, "DEBUG: After Init_Options, app->path='%s'\n", app->path); fflush(file_stdout); }
 
 #if defined(FULLGAME) || defined(TESTGAME)
 #if defined(WIN32)
@@ -425,18 +426,13 @@ void RunUplink ( int argc, char **argv )
 #endif
 
 		if( !Load_Data() ) {
-			if (file_stdout) { fprintf(file_stdout, "DEBUG: Load_Data FAILED\n"); fflush(file_stdout); }
 			Cleanup_Uplink ();
 			return;
 		}
-		if (file_stdout) { fprintf(file_stdout, "DEBUG: Load_Data OK, starting Init_Game\n"); fflush(file_stdout); }
 
 		Init_Game     ();
-		if (file_stdout) { fprintf(file_stdout, "DEBUG: Init_Game OK, starting Init_Graphics\n"); fflush(file_stdout); }
 		Init_Graphics ();
-		if (file_stdout) { fprintf(file_stdout, "DEBUG: Init_Graphics OK, starting Init_OpenGL\n"); fflush(file_stdout); }
 		Init_OpenGL   ( argc, argv );
-		if (file_stdout) { fprintf(file_stdout, "DEBUG: Init_OpenGL OK\n"); fflush(file_stdout); }
 		Init_Fonts	  ();
 		Init_Sound    ();
 		Init_Music    ();
@@ -805,13 +801,11 @@ bool VerifyLegitAndCodeCardCheck()
 	UplinkSnprintf ( worlddatfilename, sizeof ( worlddatfilename ), "%sworld.dat", app->path );
 	findGoodFile ( worlddatfilename );
 
-	printf ( "DEBUG: Looking for world.dat at: %s\n", worlddatfilename );
 
 	FILE *file = fopen ( worlddatfilename, "rb" );
 
 	bool match = false;
 	if ( file ) {
-		printf ( "DEBUG: world.dat file found!\n" );
 
 		fseek ( file, 128, SEEK_SET );
 		char readbuffer [9];
@@ -1011,7 +1005,6 @@ static bool TestRsLoadArchive ( char *filename )
 		printf ( "\nAn error occured in Uplink\n" );
 		printf ( "Files integrity is not verified\n" );
 		printf ( "Failed loading '%s'\n", filename );
-		if (file_stdout) { fprintf(file_stdout, "DEBUG: Failed loading archive '%s'\n", filename); fflush(file_stdout); }
 
 #ifdef WIN32
 		char message[512];
@@ -1164,9 +1157,6 @@ void Init_Graphics ()
 	o->SetThemeName ( o->GetThemeName() );
 }
 
-    // [HDUI] Initialize HD UI mode if enabled
-    // Check for --hdui command line flag or config option
-    //     HDUI::HDUIManager::GetInstance().Initialize(1920, 1080, false);
 
 void Init_Fonts	()
 {
@@ -1241,8 +1231,16 @@ void Init_OpenGL ( int argc, char **argv )
 	opengl_initialise ( argc, argv );
 
 
-        // [HDUI] Initialize HD UI mode (Allegro5)
-        HDUI::HDUIManager::GetInstance().Initialize(1920, 1080, false);
+#ifdef USE_ALLEGRO5
+	Options *options = app->GetOptions ();
+	bool fullscreen = options->IsOptionEqualTo ( "graphics_fullscreen", 1 ) &&
+					  !options->IsOptionEqualTo ( "graphics_safemode", 1 );
+	if ( !HDUI::HDUIManager::GetInstance().Initialize (
+			options->GetOptionValue ( "graphics_screenwidth" ),
+			options->GetOptionValue ( "graphics_screenheight" ), fullscreen ) ) {
+		fprintf ( stderr, "HD UI unavailable; continuing with the legacy interface.\n" );
+	}
+#endif
 
 	app->GetOptions ()->SetOptionValue ( "crash_graphicsinit", 0, "", true, false );
 	app->GetOptions ()->Save ( NULL );
@@ -1293,7 +1291,8 @@ void Run_MainMenu ()
         // This is a brand new installation
 
 		app->GetMainMenu ()->RunScreen ( MAINMENU_FIRSTLOAD );
-		GciTimerFunc ( 2000, ScriptLibrary::RunScript, 30 );
+		if ( !HDUI::HDUIManager::GetInstance().IsHDModeActive() )
+			GciTimerFunc ( 2000, ScriptLibrary::RunScript, 30 );
 
 	}
 	else {
@@ -1317,9 +1316,7 @@ void Run_Game ()
 
 void Cleanup_Uplink() {
 
-
-        // [HDUI] Shutdown HD UI
-        HDUI::HDUIManager::GetInstance().Shutdown(); // [TODO] Enable after SDL removal
+	HDUI::HDUIManager::GetInstance().Shutdown();
 #if defined(FULLGAME) || defined(TESTGAME)
 #if defined(WIN32)
 	Cleanup_Steam ();
@@ -1331,9 +1328,8 @@ void Cleanup_Uplink() {
 		app = NULL;
 	}
 
-	//if ( game ) {
-	//	delete game;
-	//	game = NULL;
-	//}
 
+#ifdef USE_ALLEGRO5
+	GciDeleteGraphicsLibrary();
+#endif
 }

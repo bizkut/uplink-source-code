@@ -58,6 +58,14 @@ public:
 	LogModifier ();
 	~LogModifier ();
 
+	int GetStatus () const { return status; }
+	int GetProgress () const { return status >= LOGMODIFIER_STATUS_MODIFYING ? progress : 0; }
+	int GetTicksRequired () const { return status >= LOGMODIFIER_STATUS_MODIFYING ? numticksrequired : 0; }
+	int GetLogType () const { return status >= LOGMODIFIER_STATUS_ACTIVE ? logtype : 0; }
+	int GetSourceIndex () const { return sourceindex; }
+	// Borrowed; resolve the PID again after any callback before using it.
+	const LogBank *GetSource () const { return source; }
+
 	void SetTarget ( UplinkObject *uo, char *uos, int uoi );
 	void MoveTo ( int x, int y, int time_ms );							// Origin top left		
 

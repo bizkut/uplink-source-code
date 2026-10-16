@@ -87,6 +87,34 @@ void EmailInterface::EmailReply ( Button *button )
 
 }
 
+void EmailInterface::EmailAttachment ( Button *button )
+{
+	EmailInterface *email = (EmailInterface *) game->GetInterface ()->GetLocalInterface ()->GetInterfaceScreen ();
+	UplinkAssert ( email );
+
+	Message *realmessage = game->GetWorld ()->GetPlayer ()->messages.GetData ( email->index );
+	if ( email->message != realmessage || !realmessage || !realmessage->GetData () ) {
+		EmailClose ( button );
+		return;
+	}
+
+	Data *attachment = new Data ( realmessage->GetData () );
+	if ( game->GetWorld ()->GetPlayer ()->gateway.databank.PutData ( attachment ) ) {
+		SgPlaySound ( RsArchiveFileOpen ( "uplinkHD/sounds/success.wav" ),
+					  "uplinkHD/sounds/success.wav" );
+	}
+	else {
+		char message [256];
+		UplinkSnprintf ( message, sizeof ( message ),
+						"Can't save attachment %s.\n"
+						"There is not enough disk space on your Gateway. "
+						"Please remove some files and then try again.",
+						attachment->title );
+		delete attachment;
+		create_msgbox ( "Error", message );
+	}
+}
+
 void EmailInterface::EmailDelete ( Button *button )
 {
 
@@ -134,6 +162,7 @@ void EmailInterface::SetMessage ( int newindex )
 	index = newindex;
 	message = game->GetWorld ()->GetPlayer ()->messages.GetData (index);
 	UplinkAssert (message);
+	message->SetRead ( true );
 
 }
 
@@ -274,25 +303,30 @@ void EmailInterface::Create ()
 		//create_stextbox ( screenw - panelwidth - 3, paneltop + 110, panelwidth, boxheight, body.str (), "email_body" );
 		create_stextbox ( screenw - panelwidth, (paneltop + 3) + 110, (panelwidth - 7), boxheight, body.str (), "email_body" );
 
-		//int x1 = screenw - panelwidth - 2;
-		//int x2 = x1 + panelwidth / 3 + 2;
-		//int x3 = x2 + panelwidth / 3 + 2;
-        //int y = paneltop + 110 + boxheight + 5;
-        //int w = panelwidth / 3 - 2;
+		const int actioncount = data ? 4 : 3;
+		const int actiongap = 2;
+		const int actionwidth = ( (panelwidth - 7) - actiongap * (actioncount - 1) ) / actioncount;
+		const int actiony = (paneltop + 3) + 110 + boxheight + 5;
+		int actionx = screenw - panelwidth;
 
-        int w = ((panelwidth - 7) - 4) / 3;
-		int x1 = screenw - panelwidth;
-        int x3 = (screenw - 7) - w;
-		int x2 = x1 + w + ( (x3 - (x1 + w)) - w ) / 2;
-        int y = (paneltop + 3) + 110 + boxheight + 5;
-
-		EclRegisterButton ( x1, y, w, 15, "Close", "Close and store this email", "email_close" );
-        EclRegisterButton ( x2, y, w, 15, "Reply", "Reply to this email", "email_reply" );
-		EclRegisterButton ( x3, y, w, 15, "Delete", "Close and delete this email", "email_delete" );
+		EclRegisterButton ( actionx, actiony, actionwidth, 15,
+							"Close", "Close and store this email", "email_close" );
+		actionx += actionwidth + actiongap;
+		if ( data ) {
+			EclRegisterButton ( actionx, actiony, actionwidth, 15,
+								data->title, "Save this attachment to your Gateway", "email_attachment" );
+			EclRegisterButtonCallback ( "email_attachment", EmailAttachment );
+			actionx += actionwidth + actiongap;
+		}
+		EclRegisterButton ( actionx, actiony, actionwidth, 15,
+							"Reply", "Reply to this email", "email_reply" );
+		actionx += actionwidth + actiongap;
+		EclRegisterButton ( actionx, actiony, actionwidth, 15,
+							"Delete", "Close and delete this email", "email_delete" );
 
 		EclRegisterButtonCallback ( "email_close", EmailClose );
-        EclRegisterButtonCallback ( "email_reply", EmailReply );
-		EclRegisterButtonCallback ( "email_delete", EmailDelete );		
+		EclRegisterButtonCallback ( "email_reply", EmailReply );
+		EclRegisterButtonCallback ( "email_delete", EmailDelete );
 
 		delete [] subject;
 
@@ -318,6 +352,7 @@ void EmailInterface::Remove ()
 		remove_stextbox ( "email_body" );
 
 		EclRemoveButton ( "email_close" );
+		EclRemoveButton ( "email_attachment" );
         EclRemoveButton ( "email_reply" );
 		EclRemoveButton ( "email_delete" );
 

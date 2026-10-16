@@ -48,6 +48,11 @@ public:
 	LanScan();
 	~LanScan();
 
+	int GetStatus () const { return status; }
+	int GetProgress () const { return status ? progress : 0; }
+	int GetTicksRequired () const { return status ? numticksrequired : 0; }
+	const char *GetScanIP () const { return status ? ip : ""; }
+
 	void SetTarget ( UplinkObject *uo, char *uos, int uoi );
 	void MoveTo ( int x, int y, int time_ms );							// Origin top left		
 

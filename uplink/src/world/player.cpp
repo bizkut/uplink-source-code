@@ -59,12 +59,6 @@ void Player::GiveMessage ( Message *message )
 
 	Agent::GiveMessage ( message );
 
-	// Transfer any attached files from the message into memory
-
-	if ( message->GetData () ) {
-		Data *datacopy = new Data ( message->GetData () );
-		gateway.databank.PutData ( datacopy );
-	}
 
 }
 

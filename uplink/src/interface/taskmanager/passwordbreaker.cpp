@@ -45,6 +45,8 @@ PasswordBreaker::PasswordBreaker () : UplinkTask ()
 {
 
 	length = difficulty = currentchar = 0;
+	progress = numticksrequired = 0;
+	completed = false;
 	caption = password = username = NULL;
 	found = NULL;
 
@@ -300,7 +302,11 @@ void PasswordBreaker::Tick ( int n )
 
 					// The full word has been discovered - enter it into the password screen
 
-					EclRegisterCaptionChange ( targetstring, password );
+					Button *targetbutton = EclGetButton ( targetstring );
+					if ( targetbutton )
+						targetbutton->SetCaption ( password );
+					else
+						EclRegisterCaptionChange ( targetstring, password );
 
 					// Give the code to the player
 
@@ -309,15 +315,17 @@ void PasswordBreaker::Tick ( int n )
                     else			Computer::GenerateAccessCode( password, newcode, sizeof ( newcode ) );
 					game->GetWorld ()->GetPlayer ()->GiveCode ( game->GetWorld ()->GetPlayer ()->remotehost, newcode );				
 
-					// [UPLINKOS MOD FIX] Auto-click proceed button after cracking password
-					// Try common proceed button names for different screen types
-					if ( EclGetButton ( "useridscreen_proceed" ) ) {
-						EclClickButton ( "useridscreen_proceed" );
-					} else if ( EclGetButton ( "highsecurity_proceed" ) ) {
-						EclClickButton ( "highsecurity_proceed" );
-					} else if ( EclGetButton ( "cypherscreen_proceed" ) ) {
-						EclClickButton ( "cypherscreen_proceed" );
+					// UplinkOS automatically submits credentials after the
+					// User ID screen password has been recovered. Password-only
+					// screens advance from their Update() method once the
+					// caption matches, so they need no synthetic click.
+					if ( username ) {
+						Button *proceed = EclGetButton ( "useridscreen_proceed" );
+						if ( proceed )
+							proceed->MouseUp ();
 					}
+
+					completed = true;
 
 					// Remove this task
 

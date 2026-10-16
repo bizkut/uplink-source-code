@@ -35,6 +35,11 @@ public:
 	void SetVersion ( float newversion );
 	void SetFollowMouse ( bool newfollowmouse );
 
+	// Borrowed targets are valid only while the live model/screen remains alive.
+	UplinkObject *GetTargetObject () const { return targetobject; }
+	const char *GetTargetString () const { return targetstring; }
+	int GetTargetIndex () const { return targetint; }
+
 	virtual void SetTarget ( UplinkObject *newtargetobject, char *newtargetstring, int targetint );
 	virtual void MoveTo ( int x, int y, int time_ms );	
 	

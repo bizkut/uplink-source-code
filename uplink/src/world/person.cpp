@@ -41,6 +41,7 @@ Person::Person()
 	UplinkStrncpy ( phonenumber, " ", sizeof ( phonenumber ) );
 
 	STATUS = PERSON_STATUS_NONE;
+	female = false;
 
 	istargetable = true;
 
@@ -135,6 +136,20 @@ int Person::GetStatus ( )
 	return STATUS;
 
 }
+void Person::SetGender ( bool newfemale )
+{
+
+	female = newfemale;
+
+}
+
+bool Person::IsFemale () const
+{
+
+	return female;
+
+}
+
 
 void Person::GiveMessage ( Message *message )
 {
@@ -319,6 +334,8 @@ bool Person::Load  ( FILE *file )
 
 	LoadID ( file );
 
+	female = false;					// Pre-SAV65 people used the male name pool.
+
 	if ( !LoadDynamicStringStatic ( name, SIZE_PERSON_NAME, file ) ) return false;
 	if ( !LoadDynamicStringStatic ( localhost, SIZE_VLOCATION_IP, file ) ) return false;
 	if ( !LoadDynamicStringStatic ( remotehost, SIZE_VLOCATION_IP, file ) ) return false;
@@ -340,6 +357,9 @@ bool Person::Load  ( FILE *file )
     if ( !FileReadData ( &currentaccount, sizeof (currentaccount), 1, file ) ) return false;
 	if ( !FileReadData ( &istargetable, sizeof (istargetable), 1, file ) ) return false;
 	if ( !FileReadData ( &STATUS, sizeof(STATUS), 1, file ) ) return false;
+
+	if ( strcmp ( game->GetLoadedSavefileVer (), "SAV65" ) >= 0 )
+		if ( !FileReadData ( &female, 1, 1, file ) ) return false;
 
 	if ( !LoadLList ( (LList <UplinkObject *> *) &messages, file ) ) return false;
 	if ( !LoadLList ( &accounts, file ) ) return false;
@@ -369,6 +389,7 @@ void Person::Save  ( FILE *file )
 	fwrite ( &currentaccount, sizeof (currentaccount), 1, file );
 	fwrite ( &istargetable,	  sizeof (istargetable), 1, file );
 	fwrite ( &STATUS, sizeof(STATUS), 1, file );
+	fwrite ( &female, 1, 1, file );
 
 	SaveLList ( (LList <UplinkObject *> *) &messages, file );
 	SaveLList ( &accounts, file );

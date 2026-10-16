@@ -24,6 +24,7 @@ protected:
 
 	float numticksrequired;
 	int progress;
+	bool completed, failed;
 
 protected:
 
@@ -37,6 +38,13 @@ public:
 	DictionaryHacker();
 
 	virtual ~DictionaryHacker();
+
+	int GetStatus () const { return status; }
+	int GetCurrentIndex () const { return currentindex; }
+	int GetProgress () const { return status ? progress : 0; }
+	float GetTicksRequired () const { return status ? numticksrequired : 0; }
+	bool HasCompleted () const { return completed; }
+	bool HasFailed () const { return failed; }
 
 	void SetTarget ( UplinkObject *uo, char *uos, int uoi );				
 

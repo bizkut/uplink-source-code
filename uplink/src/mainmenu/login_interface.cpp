@@ -20,6 +20,7 @@
 
 #include "game/game.h"
 #include "game/scriptlibrary.h"
+#include "hd_ui/hd_screens.h"
 
 #include "interface/interface.h"
 #include "interface/localinterface/localinterface.h"
@@ -99,7 +100,8 @@ void LoginInterface::NewGameClick ( Button *button )
 	app->GetOptions ()->SetOptionValue ( "game_firsttime", 1 ) ;
 	
 	app->GetMainMenu ()->RunScreen ( MAINMENU_FIRSTLOAD );
-	GciTimerFunc ( 2000, ScriptLibrary::RunScript, 30 );
+	if ( !HDUI::HDUIManager::GetInstance().IsHDModeActive() )
+		GciTimerFunc ( 2000, ScriptLibrary::RunScript, 30 );
 
 #else
 

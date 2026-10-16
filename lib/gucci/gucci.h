@@ -88,6 +88,13 @@ typedef void GciReshapeFuncT(int newWidth, int oldWidth);
 typedef void GciSpecialFuncT(int key, int x, int y);
 typedef void GciCallbackT(int value);
 
+// The observer borrows each event for this call only. Returning true prevents
+// legacy input dispatch. Display lifecycle events are never offered.
+union ALLEGRO_EVENT;
+typedef bool GciInputObserverT(const ALLEGRO_EVENT &event, void *context);
+bool GciRegisterInputObserver(GciInputObserverT *observer, void *context);
+void GciUnregisterInputObserver(GciInputObserverT *observer, void *context);
+
 bool GciLayerDamaged();
 void GciSwapBuffers();
 void GciPostRedisplay();

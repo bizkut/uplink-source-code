@@ -705,7 +705,6 @@ void ScriptLibrary::Script33 ()
 	char name [SIZE_AGENT_HANDLE];
 	char password [33];
 	char password2 [33];
-	char accesscode [SIZE_AGENT_HANDLE + 32 + 32];
 
 	strncpy ( name, EclGetButton ( "nametext 0 0" )->caption, sizeof( name ) );
 	name [ sizeof( name ) - 1 ] = '\0';
@@ -716,7 +715,6 @@ void ScriptLibrary::Script33 ()
 	strncpy ( password2, EclGetButton ( "passwordtext2 0 0" )->caption, sizeof( password2 ) );
 	password2 [ sizeof( password2 ) - 1 ] = '\0';
 	
-    Computer::GenerateAccessCode( name, password, accesscode, sizeof ( accesscode ) );
 
 	if ( strcmp ( game->GetWorld ()->GetPlayer ()->handle, "NEWAGENT" ) != 0 ) {
 		create_msgbox ( "Error", "Our records show you are already\n"
@@ -760,6 +758,23 @@ void ScriptLibrary::Script33 ()
 		return;
 	}
 
+	RegisterNewAgent ( name, password );
+
+	// Keep the original registration screen transition for the legacy flow.
+#ifdef TESTGAME
+	game->GetInterface ()->GetRemoteInterface ()->RunScreen ( 5 );
+#else
+	game->GetInterface ()->GetRemoteInterface ()->RunScreen ( 4 );
+#endif
+
+}
+
+void ScriptLibrary::RegisterNewAgent ( char *name, char *password )
+{
+
+	// GOLD sub_4686A0: one bootstrap shared by Eclipse and the HD intro.
+	char accesscode [SIZE_AGENT_HANDLE + 64 + 32];
+	Computer::GenerateAccessCode ( name, password, accesscode, sizeof ( accesscode ) );
 	game->GetWorld ()->GetPlayer ()->SetHandle ( name );
 
 	// Open a new account with Uplink International Bank
@@ -797,12 +812,13 @@ void ScriptLibrary::Script33 ()
 	msg->SetTo		( "PLAYER" );
 	msg->SetFrom	( "Uplink public access system" );
 	msg->SetSubject ( "Welcome to Uplink" );
-	msg->SetBody	( "Your details have been entered into our account.  Congratulations, you are now "
+	msg->SetBody	( "Your details have been entered into our account. Congratulations, you are now "
 					  "an officially rated Uplink Agent.\n"
 					  "We recommend you complete the Uplink Test mission before attempting any real work.\n"
-					  "Your first stopping off point should be the Uplink Internal Services System.  Once there, "
-					  "log in and click on 'help', followed by 'getting started'.\n"
-					  "Good luck." );
+					  "Your first stopping off point should be the Uplink Internal Services System. Once there, "
+					  "log in and click on 'Help', followed by 'Getting started'. You can also go there, "
+					  "at any time, by pressing 'F1' on your keyboard.\n\n"
+					  "Good luck.\n" );
 	msg->GiveLink   ( IP_UPLINKINTERNALSERVICES );
 	msg->GiveCode   ( IP_UPLINKINTERNALSERVICES, accesscode );
 	msg->Send		();
@@ -817,22 +833,38 @@ void ScriptLibrary::Script33 ()
 	mission->SetContact ( "internal@Uplink.net" );
 	mission->SetPayment ( 0 );
 	mission->SetDifficulty ( 1 );
-	mission->SetDescription ( "Uplink Test Mission -\nSteal data from a file server" );
+	mission->SetDescription ( "Uplink Test Mission - Steal data from a file server" );
 	mission->SetFullDetails ( "Gain access to the Uplink Test Machine by breaking the outer security layer.\n"
 							  "Access the fileserver and download the target file 'Uplink Test Data'.\n"
 							  "Remove any traces of your hack.\n"
 							  "Return the data to us at address internal@Uplink.net" );
 	mission->GiveLink ( IP_UPLINKTESTMACHINE );
+	mission->SetTarget ( "Uplink Test Machine" );
 						 
 	game->GetWorld ()->GetPlayer ()->GiveMission (mission);
 
-	// Run the next screen
 
-#ifdef TESTGAME
-	game->GetInterface ()->GetRemoteInterface ()->RunScreen ( 5 );
-#else
-	game->GetInterface ()->GetRemoteInterface ()->RunScreen ( 4 );    
-#endif
+}
+
+void ScriptLibrary::CompleteFirstRun ()
+{
+
+	// GOLD sub_4711A0: leave the public server, create the local HUD and
+	// enter the gateway's welcome screen without legacy animation timers.
+	Player *player = game->GetWorld ()->GetPlayer ();
+	player->GetConnection ()->Disconnect ();
+	player->GetConnection ()->Reset ();
+	RemoteInterface *remote = game->GetInterface ()->GetRemoteInterface ();
+	remote->RunNewLocation ();
+	remote->RunScreen ( 5 );
+
+	LocalInterface *localInterface = game->GetInterface ()->GetLocalInterface ();
+	if ( !localInterface->IsVisible () ) {
+		localInterface->Reset ();
+		localInterface->Create ();
+	}
+	app->GetOptions ()->SetOptionValue ( "game_firsttime", 0 );
+	remote->RunScreen ( 6 );
 
 }
 

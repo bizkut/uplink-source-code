@@ -243,6 +243,17 @@ void VoiceAnalyser::Initialise ()
 {
 }
 
+void VoiceAnalyser::BeginLoad ()
+{
+	if ( version < 2.0 || (STATUS != VOICEANALYSER_STATUS_READY &&
+	                      STATUS != VOICEANALYSER_STATUS_WAITING) ) return;
+	// Load selects an input file; READY's normal SetTarget path saves instead.
+	STATUS = VOICEANALYSER_STATUS_WAITING;
+	source = NULL;
+	sourceindex = -1;
+	progress = numticksrequired = 0;
+}
+
 void VoiceAnalyser::SetTarget ( UplinkObject *uo, char *uos, int uoi )
 {
 
@@ -385,6 +396,7 @@ void VoiceAnalyser::Tick ( int n )
 				
 					EclRegisterCaptionChange ( textbutton, "Awaiting voice input..." );
 					STATUS = VOICEANALYSER_STATUS_WAITING;
+					break; // The active screen is no longer a VoicePhoneScreenInterface.
 
 				}
 

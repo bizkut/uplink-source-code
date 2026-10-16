@@ -46,6 +46,18 @@ Decrypter::~Decrypter ()
 {
 }
 
+int Decrypter::GetSourceSize () const
+{
+	Data *data = source ? source->GetData (sourceindex) : NULL;
+	return data ? data->size : 0;
+}
+
+const char *Decrypter::GetSourceTitle () const
+{
+	Data *data = source ? source->GetData (sourceindex) : NULL;
+	return data ? data->title : "";
+}
+
 void Decrypter::MoveTo ( int x, int y, int time_ms )
 {
 

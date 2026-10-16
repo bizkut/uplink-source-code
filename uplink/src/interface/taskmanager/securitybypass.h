@@ -49,6 +49,8 @@ public:
 	SecurityBypass ( int newTYPE );
 	~SecurityBypass ();
 
+	const char *GetTargetIP () const { return ip; }
+
 	void SetTYPE ( int newTYPE );
 
 	void PauseCurrentBypass ();

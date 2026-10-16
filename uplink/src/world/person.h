@@ -64,6 +64,7 @@ public:
 private:
 
 	int STATUS;								// Bit field - see above
+	bool female;
 
 public:
 
@@ -79,6 +80,8 @@ public:
 	void SetPhoneNumber ( char *newphone );	
 	void SetStatus	    ( int newSTATUS );
 	int  GetStatus	    ( );
+	void SetGender      ( bool newfemale );
+	bool IsFemale       () const;
 
 	virtual void GiveMessage ( Message *message );
 

@@ -20,6 +20,7 @@
 #define SIZE_MISSION_DESCRIPTION    128
 #define SIZE_MISSION_EMPLOYER       64
 #define SIZE_MISSION_COMPLETION     64
+#define SIZE_MISSION_TARGET         128
 
 #define SIZE_PERSON_NAME	 128
 
@@ -42,6 +43,9 @@ protected:
 	char *whysomuchmoney;				// Answer to these questions
 	char *howsecure;					// They can be NULL
 	char *whoisthetarget;				//
+
+	bool read;
+	char target [SIZE_MISSION_TARGET];
 
 public:
 
@@ -91,9 +95,13 @@ public:
 	void SetDetails			( char *newdetails );
 	void SetFullDetails		( char *newdetails );
 	
-	void SetWhySoMuchMoney	( char *answer );
-	void SetHowSecure		( char *answer );
-	void SetWhoIsTheTarget  ( char *answer );
+	void SetWhySoMuchMoney	( const char *answer );
+	void SetHowSecure		( const char *answer );
+	void SetWhoIsTheTarget  ( const char *answer );
+	void SetRead            ( bool newread );
+	bool IsRead             () const;
+	void SetTarget          ( const char *newtarget );
+	const char *GetTarget   () const;
 
 	void GiveLink			( char *ip );
 	void GiveCode			( char *ip, char *code );

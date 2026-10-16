@@ -2,6 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <algorithm>
+#include <cmath>
+#include <map>
+#include <vector>
 
 #include "vanbakel.h"
 #include "interface.h"
@@ -12,6 +16,11 @@
 
 
 local LList <TaskWrapper *> tasklist;          // List of all running tasks
+local std::map<int, double> minimumCPUShare;
+local std::vector<int> cyclePIDs;
+local void (*taskRemovalObserver)(int, void *) = NULL;
+local void *taskRemovalOwner = NULL;
+local bool resettingTasks = false;
 
 // Local interface variables
 
@@ -24,12 +33,15 @@ local int nextpid = 0;
 void SvbReset ()
 {
 
-	for ( int i = 0; i < tasklist.Size (); i++ )
-		if ( tasklist.ValidIndex ( i ) && tasklist.GetData ( i ) )
-			SvbRemoveTask ( tasklist.GetData ( i )->task );
+	resettingTasks = true;
+	while ( tasklist.Size () > 0 )
+		SvbRemoveTask ( tasklist.GetData (0)->pid );
 
 	tasklist.Empty ();
+	minimumCPUShare.clear ();
+	cyclePIDs.clear ();
 	nextpid = 0;
+	resettingTasks = false;
 
 	Svb_initialise_interface ();
 
@@ -52,10 +64,13 @@ int SvbRegisterTask ( char *name, Task *task )
 
 	// Run the task
 
+	const int pid = newtw->pid;
 	task->Initialise ();
-	if ( SvbIsInterfaceVisible () ) task->CreateInterface ();
+	// Initialise/Tick callbacks may remove the task and its wrapper.
+	task = SvbGetTask (pid);
+	if ( task && SvbIsInterfaceVisible () ) task->CreateInterface ();
 
-	return newtw->pid;
+	return pid;
 
 }
 
@@ -71,6 +86,7 @@ void SvbRemoveTask ( int pid )
 		TaskWrapper *taskwrapper = tasklist [index];
 		assert ( taskwrapper );
 
+		if ( taskRemovalObserver && !resettingTasks ) taskRemovalObserver (pid, taskRemovalOwner);
 		if ( taskwrapper->task ) {
 			taskwrapper->task->RemoveInterface ();
 			delete taskwrapper->task;
@@ -78,6 +94,7 @@ void SvbRemoveTask ( int pid )
 
 		removedpriority = taskwrapper->priority;
 		tasklist.RemoveData ( index );
+		minimumCPUShare.erase (pid);
 
 		delete taskwrapper;
 
@@ -167,82 +184,66 @@ void SvbCalculatePriorities_Remove ( double removedpriority )
 
 void SvbChangePriority ( int index, double amount, bool locked )
 {
-
+	if ( !tasklist.ValidIndex (index) || !std::isfinite (amount) ) return;
 	TaskWrapper *tw = tasklist [index];
-
-	if ( tw ) {
-
-		// Change the indexed priority, but not out of bounds
-		double actualamount;
-		
-		assert ( tasklist [index] );
-
-		if ( tasklist [index]->priority + amount > 1.0 ) {
-			actualamount = 1.0 - tasklist [index]->priority;
-			tasklist [index]->priority = 1.0;
-		}
-		else if ( tasklist [index]->priority + amount < 0.0 ) {
-			actualamount = 0.0 - tasklist [index]->priority;
-			tasklist [index]->priority = 0.0;
-		}
-		else {
-			actualamount = amount;
-			tasklist [index]->priority += amount;
-		}
-
-		if ( !locked ) {
-
-			// Change all other task priorities the other direction
-
-			for ( int i = 0; i < tasklist.Size (); ++i ) {
-
-				assert ( tasklist [i] );
-				double dP = double ( tasklist.Size () ) / double ( tasklist.Size () - 1 );	
-
-				if ( i != index ) SvbChangePriority ( i, tasklist [i]->priority * (double) actualamount * -dP, true );
-
-			}
-
-		}
-
+	if ( !tw ) return;
+	const double current = tw->priority;
+	tw->priority = std::max (0.0, std::min (1.0, current + amount));
+	// Manual decreases leave idle CPU, including when this is the only task.
+	if ( locked || tw->priority <= current ) return;
+	double peers = 0.0;
+	for ( int i = 0; i < tasklist.Size (); ++i )
+		if ( i != index ) peers += tasklist [i]->priority;
+	// Increases use idle CPU first; only the actual excess comes from peers.
+	double excess = std::max (0.0, tw->priority + peers - 1.0);
+	for ( int i = 0; i < tasklist.Size () && excess > 0.0; ++i ) {
+		if ( i == index || tasklist [i]->priority <= 0.0 ) continue;
+		TaskWrapper *peer = tasklist [i];
+		const double priority = peer->priority;
+		const double reduction = std::min (priority, std::min (excess,
+			peers > priority ? excess * (priority / peers) : excess));
+		peer->priority -= reduction;
+		peers -= priority;
+		excess -= reduction;
 	}
-
+	// Do not let rounding or an exhausted peer budget create extra CPU.
+	if ( excess > 0.0 ) tw->priority = std::max (0.0, tw->priority - excess);
 }
 
 void SvbCompensatePriorities ()
 {
-
-	if ( tasklist.Size () <= 0 )
-		return;
-
-	// Calculate the total priority
-
+	if ( tasklist.Size () <= 0 ) return;
 	double total = 0.0;
+	for ( int i = 0; i < tasklist.Size (); ++i ) total += tasklist [i]->priority;
+	// Under-allocation is intentional after a manual decrease, not an error.
+	if ( total <= 1.0 ) return;
+	for ( int i = 0; i < tasklist.Size (); ++i )
+		tasklist [i]->priority /= total;
+}
 
-	for ( int i = 0; i < tasklist.Size (); ++i ) {
+void SvbSetMinimumCPUShare ( int pid, double minimum )
+{
+	if ( SvbGetTask (pid) && std::isfinite (minimum) && minimum >= 0.0 )
+		minimumCPUShare[pid] = minimum;
+}
 
-		assert ( tasklist [i] );
-		total += tasklist [i]->priority;
+double SvbGetMinimumCPUShare ( int pid )
+{
+	const auto found = minimumCPUShare.find (pid);
+	return found != minimumCPUShare.end () ? found->second : 0.0;
+}
 
-	}
+void SvbSetTaskRemovalObserver ( void (*observer)(int, void *), void *owner )
+{
+	taskRemovalObserver = observer;
+	taskRemovalOwner = owner;
+}
 
-	// Work out the error
-
-	double error = 1.0 - total;
-
-	// Distribute the error over the tasks if neccisary
-
-	if ( error > 0.05 ) {
-
-		for ( int i = 0; i < tasklist.Size (); ++i ) {
-			
-			assert ( tasklist [i] );
-			SvbChangePriority ( i, tasklist [i]->priority * error, true );
-
-		}
-
-	}
-
+void SvbClearTaskRemovalObserver ( void *owner )
+{
+	if ( taskRemovalOwner != owner ) return;
+	taskRemovalObserver = NULL;
+	taskRemovalOwner = NULL;
 }
 
 void SvbCycle ()
@@ -254,24 +255,36 @@ void SvbCycle ()
 
 void SvbCycle ( int n )
 {
-
-	for ( int t = 0; t < tasklist.Size (); ++t ) {
-
-		TaskWrapper *tw = tasklist [t];
-		assert (tw);
-
-		tw->progress += ( n * tw->priority );
-
-		if ( tw->progress > 1.0 ) {
-			
-			int numticks = 1 + int (tw->progress - 1.0);
-			tw->task->Tick ( numticks );
-			tw->progress -= (double) numticks;
-
-		}
-
+	if ( n <= 0 ) return;
+	cyclePIDs.clear ();
+	double total = 0.0;
+	for ( int i = 0; i < tasklist.Size (); ++i ) {
+		TaskWrapper *wrapper = tasklist [i];
+		cyclePIDs.push_back (wrapper->pid);
+		total += wrapper->priority;
 	}
-
+	// GOLD HD_App::Update 004AE820 and total-share producer 004AED30:
+	// allocations above 90% reduce the common progress budget by 20%.
+	const double budget = total > 0.9 ? n + int (n * -0.2) : n;
+	for ( size_t index = 0; index < cyclePIDs.size (); ++index ) {
+		const int pid = cyclePIDs[index];
+		TaskWrapper *wrapper = SvbGetTaskWrapper (pid);
+		if ( !wrapper || !wrapper->task ) continue;
+		double rate = wrapper->priority * budget;
+		const auto minimum = minimumCPUShare.find (pid);
+		// 0045F140 stores minimum at +180; 0045F160 stores priority at
+		// +184. Preserve 004AE820's literal, surprising greater-than rule.
+		if ( minimum != minimumCPUShare.end () && wrapper->priority > minimum->second )
+			rate *= 0.5;
+		wrapper->progress += rate;
+		const int ticks = static_cast<int> (wrapper->progress);
+		if ( ticks <= 0 ) continue;
+		wrapper->progress -= ticks;
+		Task *task = wrapper->task;
+		task->Tick (ticks);
+		// Tick may delete itself, remove peers or register another PID.
+		// Never touch this task/wrapper again; new tasks wait for next cycle.
+	}
 }
 
 int SvbLookupIndex ( int pid )

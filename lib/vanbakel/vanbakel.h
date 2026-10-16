@@ -64,6 +64,15 @@ void SvbCompensatePriorities ();        // Compensates for accumulated errors
 // Locked - no other priorities will be changed
 void SvbChangePriority ( int index, double amount, bool locked = false );
 
+// GOLD application scheduler metadata, keyed by PID rather than task pointers.
+void SvbSetMinimumCPUShare ( int pid, double minimum );
+double SvbGetMinimumCPUShare ( int pid );
+
+// Called while the PID still resolves, before RemoveInterface/destruction.
+// The observer must copy values only and must not mutate the scheduler.
+void SvbSetTaskRemovalObserver ( void (*observer)(int, void *), void *owner );
+void SvbClearTaskRemovalObserver ( void *owner );
+
 // Visualisation of VanBakel tasks (uses Eclipse library) =====================
 
 

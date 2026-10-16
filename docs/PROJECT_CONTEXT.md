@@ -1,119 +1,56 @@
-# Uplink Source Code - Project Context
+# Project Context
 
-This document provides context for AI agents and developers working on the Uplink source code.
+## Goal
 
-## Project Overview
+Reconstruct UplinkOS GOLD v1.04 behavior from the modified binary and port it onto the released Linux Uplink source.
 
-**Uplink** is a 2001 hacking simulation game by Introversion Software. This is the **official source code** released for Linux, with modifications from the **UplinkOS mod** (Windows) being integrated.
+The reference executable is `uplink/mod/UplinkOS.exe`, SHA-256
+`4461a546b74f19ea3874a72723c4c743731c5b84de09c209950e85684e1a7fd8`.
+The Linux result is a source-level behavioral reconstruction, not a byte-identical PE rebuild.
 
-## ⚠️ CRITICAL AGENT INSTRUCTIONS
+## Evidence order
 
-**ALWAYS REFER TO THE DECOMPILED MOD CODE (`uplink/mod/UplinkOS.exe.c`) FIRST.**
+1. `uplink/mod/UplinkOS.exe.c`: final target pseudocode.
+2. `uplink/mod/UplinkOS.i64` / live IDA xrefs and disassembly: addresses, bounds, call/data references.
+3. `uplink/mod/UplinkOS_ReadMe.txt`: claimed feature/change inventory, not proof of implementation.
+4. `uplink/mod/uplinkHD/`: final layouts/assets/default hotkeys/name data.
+5. Released source and the historical CptMcBacon branch: reusable intent only; final binary wins on conflicts.
 
-When investigating features, bugs, or logic from the UplinkOS mod:
-1.  **Do not guess** implementation details.
-2.  **Search** the decompiled C code using unique string literals, error messages, or constant values.
-3.  **Compare** the mod's logic side-by-side with the original source.
-4.  **Replicate** the exact logic used in the mod where appropriate.
+Do not infer behavior from a changelog entry when the final code is available. Record unresolved target behavior rather than inventing it.
 
-The decompiled code is the **primary source of truth** for all functional changes.
+## Source map
 
-## Directory Structure
+| Path | Responsibility |
+|---|---|
+| `uplink/src/app/` | process, options, paths, serialization helpers, graphics loop |
+| `uplink/src/game/` | game lifecycle and one-shot scripts |
+| `uplink/src/world/` | persistent model, generation, scheduler, missions |
+| `uplink/src/interface/` | original Eclipse local/remote screens and hacking tasks |
+| `uplink/src/hd_ui/` | reconstructed Allegro/XML UI runtime and migrated GOLD screens |
+| `lib/gucci/` | Allegro event/display bridge |
+| `lib/vanbakel/` | task scheduler and priorities |
+| `uplink/bin/uplinkHD/` | runtime HD assets |
+| `uplink/mod/` | reverse-engineering evidence |
 
-```
-uplink-source-code/
-├── contrib/          # Third-party libraries (SDL, FTGL, etc.)
-├── lib/              # Compiled library outputs
-├── uplink/
-│   ├── bin/          # Compiled game binary + data files
-│   ├── mod/          # UplinkOS mod files (reference)
-│   │   ├── UplinkOS.exe.c   # Decompiled mod (801k lines)
-│   │   └── UplinkOS_ReadMe.txt  # Mod changelog (IMPORTANT!)
-│   └── src/          # Game source code
-│       ├── app/      # Application core
-│       ├── game/     # Game logic, scriptlibrary
-│       ├── interface/# UI components
-│       │   ├── taskmanager/  # Hacking tools (passwordbreaker, etc.)
-│       │   ├── localinterface/  # Player-side UI (LAN view, etc.)
-│       │   └── remoteinterface/ # Server-side screens
-│       └── world/    # Game world (computers, companies, etc.)
-└── docs/             # Documentation
-```
+## Current architecture
 
-## Key Source Files
+The original OpenGL/Eclipse renderer remains the gameplay model and callback
+backend. Allegro 5 owns the display/event queue. The HD manager borrows that
+display, observes input before Eclipse, draws after Eclipse, and never flips
+independently. Migrated trees are exclusively owned beneath one scaled root.
 
-| File | Purpose |
-|------|---------|
-| `scriptlibrary.cpp` | Button click handlers (Script10=bank transfer, Script12=stock account) |
-| `passwordbreaker.cpp` | Password cracking tool |
-| `voiceanalyser.cpp` | Voice analysis tool |
-| `filecopier.cpp` | File download tool |
-| `logdeleter.cpp` | Log deletion tool |
-| `lan_interface.cpp` | LAN network view |
-| `lanmonitor.cpp` | LAN state tracking |
+Every screen for which the target defines a final `HD_*` controller/layout now
+has a source controller: onboarding and main menu, HUD/local windows, remote
+computer services, hacking applications, map/LAN, and ending screens. Eclipse
+continues to render only target screens without an HD counterpart, notably Code
+Card and Nearest Gateway. Save format is SAV67. Linux user files live in
+`$HOME/.uplink/`; runtime assets resolve from `app->path`, so run from
+`uplink/bin`.
 
-## Build Instructions
+## Build
 
-```bash
-# Set environment
-export UPLINKROOT=/path/to/uplink-source-code
+Use `BUILDING.linux`. The final executable is produced at `uplink/src/uplink.full`, then deployed to `uplink/bin/uplink`. `Makefile.linux` must keep `USE_ALLEGRO5` defined or HD initialization is compiled out.
 
-# Build dependencies 
-cd $UPLINKROOT/contrib && make
+## Verification standard
 
-# Build libraries
-cd $UPLINKROOT/lib && make
-
-# Build game
-cd $UPLINKROOT/uplink/src && make
-
-# Output: uplink.full in src/, or bin/uplink for runnable version
-```
-
-## UplinkOS Mod Integration
-
-The UplinkOS mod (Windows, Allegro5) contains bug fixes. Key fixes have been integrated:
-
-### ✅ Already Integrated
-- Bank transfer field validation (`scriptlibrary.cpp:Script10`)
-- Stock account creation validation (`scriptlibrary.cpp:Script12`)
-- File download disconnect handling (`filecopier.cpp`)
-- Voice analyzer disconnect handling (`voiceanalyser.cpp`)
-
-### ⚠️ UplinkOS-Specific (Not Applicable)
-Most UplinkOS fixes are for its Allegro5 UI rewrite and don't apply to the original SDL/OpenGL codebase:
-- UI scaling fixes
-- Task Manager v2
-- Hotkey externalization
-- Tour Guide feature
-
-### Reference Files
-- `uplink/mod/UplinkOS_ReadMe.txt` - Complete changelog with all fixes
-- `uplink/mod/UplinkOS.exe.c` - Decompiled mod code (hard to read)
-
-## Common Tasks
-
-### Finding Function Implementations
-```bash
-grep -rn "FunctionName" uplink/src/
-```
-
-### Comparing with Decompiled Mod
-The decompiled code uses mangled names. Search for **string literals** instead:
-```bash
-grep -n "error message text" uplink/mod/UplinkOS.exe.c
-```
-
-### Building for Linux
-Requires: OpenGL, SDL, FTGL, libjpeg, and other dependencies listed in BUILDING.linux
-
-## Known Issues
-
-1. **Copy protection** - May need to disable for testing (see app/app.cpp)
-2. **FTGL dependency** - May need manual configuration
-
-## Related Documentation
-
-- `docs/MOD_FIXES.md` - Detailed mod fix tracking
-- `BUILDING.linux` - Build instructions
-- `.agent/workflows/` - Agent workflow files (if any)
+For UI changes, launch the binary and interact with the actual surface. For save/model changes, create a profile, stop/restart the process, and load it. A successful compile alone is not completion. Keep `docs/MOD_FIXES.md` aligned with observed verification and residual gaps.

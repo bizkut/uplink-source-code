@@ -45,6 +45,13 @@ public:
 	LogDeleter ();
 	~LogDeleter ();
 
+	int GetStatus () const { return status; }
+	int GetProgress () const { return status ? progress : 0; }
+	int GetTicksRequired () const { return status ? numticksrequired : 0; }
+	int GetSourceIndex () const { return sourceindex; }
+	// Borrowed from the model; never retain across a task/model callback.
+	const LogBank *GetSource () const { return source; }
+
 	void SetTarget ( UplinkObject *uo, char *uos, int uoi );
 	void MoveTo ( int x, int y, int time_ms );				// Centred on top-right of title image
 

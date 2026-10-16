@@ -43,6 +43,7 @@ Tutorial::Tutorial ()
 
 	current_tutorial = 0;
 	current_part = 0;
+	nextvisible = false;
 	nextclicked = false;
 	menu = false;
 

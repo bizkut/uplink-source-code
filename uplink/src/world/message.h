@@ -32,6 +32,7 @@ protected:
 	char *body;
 
 	Data *data;							// An attached file/program
+	bool read;
 
 public:
 
@@ -57,11 +58,14 @@ public:
 	void GiveLink ( char *ip );
 	void GiveCode ( char *ip, char *code );
 
-	void AttachData ( Data *newdata );
+	void AttachData ( Data *newdata );	// Owns a copy; NULL removes the attachment.
 	Data *GetData ();
 
 	char *GetSubject ();
 	char *GetBody	 ();
+
+	void SetRead ( bool newread );
+	bool IsRead () const;
 
 	void Send ();
 

@@ -620,6 +620,7 @@ bool PlotGenerator::PlayerContactsARC ( Message *msg )
 					   "THE ATTACHED PROGRAM LOCALLY.\n\n"
 					   "[END]" );
 		msg->AttachData ( revelation );
+		delete revelation;
 		msg->Send ();
 
 		game->GetWorld ()->GetPlayer ()->ChangeBalance ( 10000, "Anonymous donation" );
@@ -2609,6 +2610,7 @@ void PlotGenerator::Run_Act5Scene2 ()
                        "how many systems have been infected with the Virus.\n"
                        "You will need this for your next mission." );
         msg->AttachData ( data );
+        delete data;
         msg->Send ();
 
         //
@@ -2626,6 +2628,7 @@ void PlotGenerator::Run_Act5Scene2 ()
                         "You will need this file for your next mission.\n\n"
                         "DO NOT ATTEMPT TO RUN IT LOCALLY" );
         msg2->AttachData ( data2 );
+        delete data2;
         msg2->Send ();
 
         //

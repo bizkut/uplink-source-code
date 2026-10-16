@@ -220,20 +220,6 @@ SOFTWARE_UPGRADES [] = {
                                                                                         "Actively bypasses encryption with a security level of 5 or below\n"
                                                                                         "All bypassers require a 'HUD:ConnectionAnalysis' upgrade first",
 */
-							"File_Copier",				1,		100,	1,		1,  	"FILE COPIER V1.0\n"
-                                                                                        "TYPE: software.FileUtil\n\n"
-                                                                                        "Copies programs and data from one databank to another\n"
-                                                                                        "Standard software tool given free to all Agents",
-
-							"File_Deleter",				1,		100,	1,		1,  	"FILE DELETER V1.0\n"
-                                                                                        "TYPE: software.FileUtil\n\n"
-                                                                                        "Deletes programs and data from a databank\n"
-                                                                                        "Standard software tool given free to all Agents",
-
-							"Defrag",					1,		5000,	2,		1,		"DEFRAG\n"
-																						"TYPE: software.FileUtil\n\n"
-																						"Pushes all of your files together at the top of your memory banks\n"
-																						"and frees up large blocks of space for use",
 
 							"Firewall_Bypass",			5,		3000,	1,		1,  	"FIREWALL BYPASS V1.0\n"
                                                                                         "TYPE: software.Bypasser\n\n"
@@ -290,11 +276,16 @@ SOFTWARE_UPGRADES [] = {
                                                                                         "Upgrades your HUD so that you can see the security systems installed on your target computer, "
                                                                                         "and launch Bypass software at them",
 
-                            "HUD_IRC-Client",           9,      4000,   2,      1,      "IRC CLIENT V1.0\n"
+							"HUD_ConnectionRandomizer",	9,		2500,	3,		1,  	"CONNECTION RANDOMIZER V1.0\n"
                                                                                         "TYPE: software.HUDUpgrade\n\n"
-                                                                                        "Upgrades your HUD with a new screen, in which you can participate in Internet Relay Chat. "
-                                                                                        "This allows you to talk to other hackers for help.\n"
-                                                                                        "You will also need an Internet Connection on your local machine.",
+                                                                                        "Allows your Connection Map to do the hard work. Just click on the systems you wish to connect to "
+                                                                                        "and the Randomizer will create an intricate bounce through all of your available bookmarks.",
+
+							"HUD_TaskManager_V2.0",		9,		5000,	3,		1,  	"TASK MANAGER V2.0\n"
+                                                                                        "TYPE: software.HUDUpgrade\n\n"
+                                                                                        "Upgrades the already present Task Manager to the newest version. "
+                                                                                        "This version let's you manage App priorities in greater detail.",
+
 
 							"HUD_MapShowTrace",			9,		5000,	1,		1,  	"MAP SHOW TRACE V1.0\n"
                                                                                         "TYPE: software.HUDUpgrade\n\n"
@@ -364,7 +355,7 @@ SOFTWARE_UPGRADES [] = {
 																						"into believing you are that system.\n"
 																						"Works on all LAN systems.",
 
-                            "LAN_Force",                6,      15000,  2,      1,      "LAN FORCE V1.0\n"
+                            "LAN_Force",                6,      18000,  2,      1,      "LAN FORCE V1.0\n"
                                                                                         "TYPE: Software.LAN\n\n"
                                                                                         "This tool will force open any lock system you might\n"
                                                                                         "encounter on a LAN system.\n"

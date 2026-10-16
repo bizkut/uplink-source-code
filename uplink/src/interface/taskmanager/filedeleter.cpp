@@ -27,9 +27,9 @@
 
 #include "world/world.h"
 #include "world/player.h"
-#include "world/vlocation.h"
 #include "world/computer/computer.h"
 #include "world/computer/databank.h"
+#include "world/computer/computerscreen/computerscreen.h"
 
 #include "mmgr.h"
 
@@ -48,6 +48,18 @@ FileDeleter::FileDeleter () : UplinkTask ()
 
 FileDeleter::~FileDeleter ()
 {
+}
+
+int FileDeleter::GetSourceSize () const
+{
+	Data *data = source ? source->GetData (sourceindex) : NULL;
+	return data ? data->size : 0;
+}
+
+const char *FileDeleter::GetSourceTitle () const
+{
+	Data *data = source ? source->GetData (sourceindex) : NULL;
+	return data ? data->title : "";
 }
 
 void FileDeleter::MoveTo ( int x, int y, int time_ms )
@@ -94,20 +106,18 @@ void FileDeleter::SetTarget ( UplinkObject *uo, char *uos, int uoi )
 
 		if ( uo->GetOBJECTID () == OID_DATABANK ) {
 
-			// [UPLINKOS MOD FIX] Check if proxy/firewall is running before allowing deletion
-			// Get the remote computer and check security
-			VLocation *vl = game->GetWorld ()->GetPlayer ()->GetRemoteHost ();
-			if ( vl ) {
-				Computer *comp = vl->GetComputer ();
-				if ( comp && (comp->security.IsRunning_Proxy () || comp->security.IsRunning_Firewall ()) ) {
-					// Security system is running - cannot delete files
+			bool targetIsRemote = strstr ( uos, "fileserverscreen" ) != NULL;
+
+			if ( targetIsRemote ) {
+				Computer *comp = game->GetInterface ()->GetRemoteInterface ()->GetComputerScreen ()->GetComputer ();
+				if ( comp && comp->security.IsRunning_Firewall () )
+					return;
+
+				// Read-only accounts cannot delete remote files.
+				if ( game->GetInterface ()->GetRemoteInterface ()->security_level > 2 ) {
+					create_msgbox ( "Error", "Access Denied\nInsufficient Security Level" );
 					return;
 				}
-                // [UPLINKOS MOD FIX] ReadOnly accounts cannot delete files
-                if ( game->GetInterface ()->GetRemoteInterface ()->security_level > 2 ) {
-                    create_msgbox ( "Error", "Access Denied\nInsufficient Security Level" );
-                    return;
-                }
 			}
 
 			// Databank selected
@@ -123,7 +133,7 @@ void FileDeleter::SetTarget ( UplinkObject *uo, char *uos, int uoi )
 				numticksrequired = TICKSREQUIRED_DELETE * data->size;
 				progress = 0;
 
-                remotefile = strstr ( uos, "fileserverscreen" ) ? true : false;
+				remotefile = targetIsRemote;
 
 				Button *button = EclGetButton ( uos );
 				UplinkAssert (button);

@@ -32,6 +32,8 @@ public:
 
 	IPLookup ();
 	~IPLookup ();
+
+	int GetStatus () const { return status; }
 	
 	void Initialise ();     
 	void Tick ( int n );	

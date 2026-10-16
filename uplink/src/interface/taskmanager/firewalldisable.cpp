@@ -198,7 +198,7 @@ void FirewallDisable::Tick ( int n )
 		}
 		else if ( progress == 1 ) {											// We are analysing			
 
-			++ticksdone;
+			ticksdone += n;
 
 			EclGetButton ( sprogress )->width = (int) ( 40 * ((float) ticksdone / (float) ticksrequired) );
 			EclDirtyButton ( sprogress );
@@ -232,7 +232,7 @@ void FirewallDisable::Tick ( int n )
 		}
 		else if ( progress == 2 ) {											// We are disabling
 
-			++ticksdone;
+			ticksdone += n;
 
 			EclGetButton ( sprogress )->width = (int) ( 40 + 80 * ((float) ticksdone / (float) ticksrequired) );
 			EclDirtyButton ( sprogress );

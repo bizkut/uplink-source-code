@@ -49,6 +49,7 @@ public:
 	Option *GetOption ( char *name );												// Returns NULL if not found
 	int     GetOptionValue ( char *name );											// asserts existence of name
 	bool    IsOptionEqualTo ( char *name, int value );
+	int     GetEffectiveOptionValue ( char *name );
 	
 	void    SetOptionValue ( char *name, int newvalue );							// Does not create new 
 	void	SetOptionValue ( char *name, int newvalue, char *tooltip, 

@@ -47,6 +47,8 @@ Mission::Mission ()
     minuplinkrating = -1;
     acceptrating = 0;
 	npcpriority = false;
+	read = false;
+	UplinkStrncpy ( target, "", sizeof ( target ) );
 
 }
 
@@ -148,7 +150,7 @@ void Mission::SetFullDetails ( char *newdetails )
 
 }
 
-void Mission::SetWhySoMuchMoney	( char *answer )
+void Mission::SetWhySoMuchMoney	( const char *answer )
 {
 
 	if ( whysomuchmoney ) delete [] whysomuchmoney;
@@ -163,7 +165,7 @@ void Mission::SetWhySoMuchMoney	( char *answer )
 
 }
 
-void Mission::SetHowSecure ( char *answer )
+void Mission::SetHowSecure ( const char *answer )
 {
 
 	if ( howsecure ) delete [] howsecure;
@@ -178,7 +180,7 @@ void Mission::SetHowSecure ( char *answer )
 
 }
 
-void Mission::SetWhoIsTheTarget ( char *answer )
+void Mission::SetWhoIsTheTarget ( const char *answer )
 {
 
 	if ( whoisthetarget ) delete [] whoisthetarget;
@@ -192,6 +194,35 @@ void Mission::SetWhoIsTheTarget ( char *answer )
 	}
 
 }
+void Mission::SetRead ( bool newread )
+{
+
+	read = newread;
+
+}
+
+bool Mission::IsRead () const
+{
+
+	return read;
+
+}
+
+void Mission::SetTarget ( const char *newtarget )
+{
+
+	UplinkAssert ( strlen ( newtarget ) < SIZE_MISSION_TARGET );
+	UplinkStrncpy ( target, newtarget, sizeof ( target ) );
+
+}
+
+const char *Mission::GetTarget () const
+{
+
+	return target;
+
+}
+
 
 void Mission::SetEmployer ( char *newemployer )
 {
@@ -331,7 +362,26 @@ bool Mission::Load  ( FILE *file )
 
 	LoadID ( file );
 
+	delete duedate;
 	duedate = NULL;
+	delete [] details;
+	details = NULL;
+	delete [] fulldetails;
+	fulldetails = NULL;
+	delete [] whysomuchmoney;
+	whysomuchmoney = NULL;
+	delete [] howsecure;
+	howsecure = NULL;
+	delete [] whoisthetarget;
+	whoisthetarget = NULL;
+	DeleteLListData ( &links );
+	links.Empty ();
+	DeleteBTreeData ( &codes );
+	codes.Empty ();
+	maxpayment = 0;
+	paymentmethod = MISSIONPAYMENT_AFTERCOMPLETION;
+	read = false;
+	UplinkStrncpy ( target, "", sizeof ( target ) );
 
 	if ( !FileReadData ( &TYPE, sizeof(TYPE), 1, file ) ) return false;
 	
@@ -366,8 +416,12 @@ bool Mission::Load  ( FILE *file )
 	if ( !FileReadData ( &hasduedate, sizeof(hasduedate), 1, file ) ) return false;
 
 	if ( hasduedate ) {
-		duedate = new Date ();
-		if ( !duedate->Load ( file ) ) return false;
+		Date *loadedduedate = new Date ();
+		if ( !loadedduedate->Load ( file ) ) {
+			delete loadedduedate;
+			return false;
+		}
+		duedate = loadedduedate;
 	}
 
 	if ( strcmp( game->GetLoadedSavefileVer(), "SAV57" ) >= 0 ) {
@@ -376,6 +430,12 @@ bool Mission::Load  ( FILE *file )
 		if ( !FileReadData ( &paymentmethod, sizeof(paymentmethod), 1, file ) ) return false;
 
 	}
+
+	if ( strcmp ( game->GetLoadedSavefileVer (), "SAV64" ) >= 0 )
+		if ( !FileReadData ( &read, 1, 1, file ) ) return false;
+
+	if ( strcmp ( game->GetLoadedSavefileVer (), "SAV67" ) >= 0 )
+		if ( !LoadDynamicStringStatic ( target, SIZE_MISSION_TARGET, file ) ) return false;
 
 	LoadID_END ( file );
 
@@ -423,6 +483,9 @@ void Mission::Save  ( FILE *file )
 
 	fwrite ( &maxpayment, sizeof(maxpayment), 1, file );
 	fwrite ( &paymentmethod, sizeof(paymentmethod), 1, file );
+	fwrite ( &read, 1, 1, file );
+	// GOLD uses a 64-byte save limit for this 128-byte target buffer.
+	SaveDynamicString ( target, SIZE_MISSION_COMPLETION, file );
 	
 	SaveID_END ( file );
 

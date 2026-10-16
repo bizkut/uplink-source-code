@@ -36,6 +36,10 @@ public:
 
 	Decypher ();
 	~Decypher ();
+
+	int GetStatus () const { return status; }
+	int GetProgress () const { return status ? progress : 0; }
+	int GetTicksRequired () const { return status ? numticksrequired : 0; }
 	
 	void SetTarget ( UplinkObject *uo, char *uos, int uoi );
 	void MoveTo ( int x, int y, int time_ms );				// Centred on top-right of title image

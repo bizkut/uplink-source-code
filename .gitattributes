@@ -1,0 +1,8 @@
+# Original Uplink C/C++ and make sources are stored with CRLF endings.
+# Treat the carriage return as part of the line ending during whitespace checks.
+*.c whitespace=cr-at-eol
+*.cc whitespace=cr-at-eol
+*.cpp whitespace=cr-at-eol
+*.h whitespace=cr-at-eol
+*.hpp whitespace=cr-at-eol
+Makefile* whitespace=cr-at-eol

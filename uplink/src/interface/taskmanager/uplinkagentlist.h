@@ -34,6 +34,10 @@ public:
 	UplinkAgentList();
 	virtual ~UplinkAgentList();
 
+	int GetAgentCount () const { return handles.Size (); }
+	const char *GetAgentHandle ( int index ) const { return handles.ValidIndex (index) ? handles.GetData (index) : ""; }
+	const char *GetAgentName ( int index ) const { return names.ValidIndex (index) ? names.GetData (index) : ""; }
+
     void UpdateLists ();
 
 	void SetTarget ( UplinkObject *uo, char *uos, int uoi );				

@@ -157,6 +157,7 @@ void MissionInterface::SetMission ( int newindex )
 	index = newindex;
 	mission = game->GetWorld ()->GetPlayer ()->missions.GetData ( index );
 	UplinkAssert (mission);
+	mission->SetRead ( true );
 
 }
 

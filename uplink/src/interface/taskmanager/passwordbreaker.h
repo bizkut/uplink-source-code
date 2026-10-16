@@ -22,6 +22,7 @@ protected:
 
 	int numticksrequired;						// For next letter
 	int progress;
+	bool completed;
 
 protected:
 
@@ -37,6 +38,13 @@ public:
 	PasswordBreaker();
 
 	virtual ~PasswordBreaker();
+
+	int GetLength () const { return length; }
+	int GetCurrentCharacter () const { return currentchar; }
+	int GetProgress () const { return length > 0 ? progress : 0; }
+	int GetTicksRequired () const { return length > 0 ? numticksrequired : 0; }
+	const char *GetCaption () const { return caption ? caption : ""; }
+	bool HasCompleted () const { return completed; }
 
 	void SetTarget ( UplinkObject *uo, char *uos, int uoi );				
 

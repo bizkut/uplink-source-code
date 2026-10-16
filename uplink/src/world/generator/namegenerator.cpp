@@ -19,7 +19,8 @@
 #include "mmgr.h"
 
 
-LList <char *> NameGenerator::fornames;
+LList <char *> NameGenerator::fornamesM;
+LList <char *> NameGenerator::fornamesF;
 LList <char *> NameGenerator::surnames;
 LList <char *> NameGenerator::agentaliases;
 LList <char *> NameGenerator::companynamesA;
@@ -36,13 +37,15 @@ void NameGenerator::Initialise ()
 void NameGenerator::Shutdown ()
 {
 
-    DeleteLListData ( &fornames );
+    DeleteLListData ( &fornamesM );
+    DeleteLListData ( &fornamesF );
     DeleteLListData ( &surnames );
     DeleteLListData ( &agentaliases );
     DeleteLListData ( &companynamesA );
     DeleteLListData ( &companynamesB );
 
-    fornames.Empty ();
+    fornamesM.Empty ();
+    fornamesF.Empty ();
     surnames.Empty ();
     agentaliases.Empty ();
     companynamesA.Empty ();
@@ -59,9 +62,9 @@ void NameGenerator::LoadNames ()
 
 	char tempName [ 128 ];
 
-	if ( fornames.Size () == 0 ) {
+	if ( fornamesM.Size () == 0 ) {
 
-		FILE *file = RsArchiveFileOpen ( "data/fornames.txt", "rt" );
+		FILE *file = RsArchiveFileOpen ( "uplinkHD/fornamesM.txt", "rt" );
 		UplinkAssert ( file );
 
 		while ( !feof ( file ) ) {
@@ -69,15 +72,37 @@ void NameGenerator::LoadNames ()
 			fscanf ( file, "%s\n", tempName );
 			char *name = new char [ strlen ( tempName ) + 1 ];
 			UplinkSafeStrcpy ( name, tempName );
-			fornames.PutData ( name );
+			fornamesM.PutData ( name );
 
 		}
 		
-        char *deleteme = fornames.GetData ( fornames.Size () - 1 );
+        char *deleteme = fornamesM.GetData ( fornamesM.Size () - 1 );
         delete [] deleteme;
-        fornames.RemoveData ( fornames.Size () - 1 );					// Remove last entry
+        fornamesM.RemoveData ( fornamesM.Size () - 1 );					// Remove last entry
 
-		RsArchiveFileClose ( "data/fornames.txt", file );
+		RsArchiveFileClose ( "uplinkHD/fornamesM.txt", file );
+
+	}
+
+	if ( fornamesF.Size () == 0 ) {
+
+		FILE *file = RsArchiveFileOpen ( "uplinkHD/fornamesF.txt", "rt" );
+		UplinkAssert ( file );
+
+		while ( !feof ( file ) ) {
+
+			fscanf ( file, "%s\n", tempName );
+			char *name = new char [ strlen ( tempName ) + 1 ];
+			UplinkSafeStrcpy ( name, tempName );
+			fornamesF.PutData ( name );
+
+		}
+
+        char *deleteme = fornamesF.GetData ( fornamesF.Size () - 1 );
+        delete [] deleteme;
+        fornamesF.RemoveData ( fornamesF.Size () - 1 );
+
+		RsArchiveFileClose ( "uplinkHD/fornamesF.txt", file );
 
 	}
 
@@ -87,7 +112,7 @@ void NameGenerator::LoadNames ()
 
 	if ( surnames.Size () == 0 ) {
 
-		FILE *file = RsArchiveFileOpen ( "data/surnames.txt", "rt" );
+		FILE *file = RsArchiveFileOpen ( "uplinkHD/surnames.txt", "rt" );
 		UplinkAssert ( file );
 
 		while ( !feof ( file ) ) {
@@ -103,7 +128,7 @@ void NameGenerator::LoadNames ()
         delete [] deleteme;
 		surnames.RemoveData ( surnames.Size () - 1 );					// Remove last entry
 
-		RsArchiveFileClose ( "data/surnames.txt", file );
+		RsArchiveFileClose ( "uplinkHD/surnames.txt", file );
 
 	}
 
@@ -113,7 +138,7 @@ void NameGenerator::LoadNames ()
 
 	if ( agentaliases.Size () == 0 ) {
 
-		FILE *file = RsArchiveFileOpen ( "data/agentaliases.txt", "rt" );
+		FILE *file = RsArchiveFileOpen ( "uplinkHD/agentaliases.txt", "rt" );
 		UplinkAssert ( file );
 
 		while ( !feof ( file ) ) {
@@ -129,7 +154,7 @@ void NameGenerator::LoadNames ()
         delete [] deleteme;
 		agentaliases.RemoveData ( agentaliases.Size () - 1 );					// Remove last entry
 
-		RsArchiveFileClose ( "data/agentaliases.txt", file );
+		RsArchiveFileClose ( "uplinkHD/agentaliases.txt", file );
 
 	}
 
@@ -218,11 +243,12 @@ char *NameGenerator::GenerateCompanyName ()
 
 }
 
-char *NameGenerator::GeneratePersonName ()
+char *NameGenerator::GeneratePersonName ( bool female )
 {
 
 	LoadNames ();								// Won't do anything if names exist
 
+	LList <char *> &fornames = female ? fornamesF : fornamesM;
 	int size_f = fornames.Size ();
 	int size_s = surnames.Size ();
 	
